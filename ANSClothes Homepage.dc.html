@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>ANSClothes — Premium T-Shirts | www.ansclothes.com</title>
+  <meta name="description" content="ANSClothes — premium quality t-shirts crafted in Bangladesh. Minimal design, heavyweight comfort. Pants and drop-shoulder collections coming soon. Shop at www.ansclothes.com">
+  <meta name="keywords" content="ANSClothes, t-shirt, premium tshirt Bangladesh, minimal clothing brand">
+  <meta property="og:title" content="ANSClothes — Premium T-Shirts">
+  <meta property="og:description" content="Minimal design. Premium quality. The new standard in everyday tees.">
+  <meta property="og:url" content="https://www.ansclothes.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0;padding:0;background:#fff;color:#0a0a0a;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:#0a0a0a;text-decoration:none}
+    a:hover{color:#555}
+    @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</helmet>
+
+<div style="min-width:1100px">
+<sc-if value="{{ showAnnouncement }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#0a0a0a;color:#fff;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;text-align:center;padding:10px 0;font-weight:500">Free delivery on your first order — www.ansclothes.com</div>
+</sc-if>
+
+<header style="display:flex;align-items:center;justify-content:space-between;padding:22px 56px;border-bottom:1px solid #e8e8e8;background:#fff;position:sticky;top:0;z-index:50">
+  <img src="assets/logo.png" alt="ANSClothes logo" style="height:34px;mix-blend-mode:multiply">
+  <nav style="display:flex;gap:32px;align-items:center;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;font-weight:500">
+    <a href="#shop">T-Shirts</a>
+    <a href="#categories">Drop Shoulder</a>
+    <a href="#categories">Polo</a>
+    <a href="#categories" style="color:#9a9a9a">Pants</a>
+    <a href="#bag" style="background:#0a0a0a;color:#fff;padding:11px 22px" style-hover="background:#333;color:#fff">Bag (0)</a>
+  </nav>
+</header>
+
+<section style="display:grid;grid-template-columns:1fr 1fr;min-height:640px;border-bottom:1px solid #e8e8e8">
+  <div style="display:flex;flex-direction:column;justify-content:center;padding:80px 72px;gap:28px;animation:fadeUp 0.7s ease both">
+    <div style="font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:#9a9a9a;font-weight:600">The First Drop — 2026</div>
+    <h1 style="font-size:76px;line-height:1.02;margin:0;font-weight:800;letter-spacing:-0.03em">Everyday tees,<br>made <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic;letter-spacing:0">properly</em>.</h1>
+    <p style="font-size:17px;line-height:1.7;color:#555;max-width:420px;margin:0">Heavyweight cotton. Clean cuts. No noise. ANSClothes starts with one thing done right — the t-shirt.</p>
+    <div style="display:flex;gap:14px;align-items:center">
+      <a href="#shop" style="background:#0a0a0a;color:#fff;padding:16px 36px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;font-weight:600" style-hover="background:#333;color:#fff">Shop T-Shirts</a>
+      <a href="#coming" style="padding:16px 28px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;font-weight:600;border:1px solid #0a0a0a" style-hover="background:#0a0a0a;color:#fff">Coming Soon</a>
+    </div>
+  </div>
+  <div style="position:relative;background:#f4f4f2;display:flex;align-items:center;justify-content:center;overflow:hidden">
+    <img src="assets/tee-navy.jpg" alt="ANSClothes premium navy oversized t-shirt" style="width:100%;height:100%;object-fit:cover">
+    <div style="position:absolute;bottom:28px;left:28px;background:#fff;padding:14px 20px;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 30px rgba(0,0,0,0.10)">
+      <span style="font-size:12px;letter-spacing:0.16em;text-transform:uppercase;font-weight:700">The Navy Essential</span>
+      <span style="font-size:13px;color:#777">৳ 850 — Oversized fit</span>
+    </div>
+  </div>
+</section>
+
+<div style="overflow:hidden;border-bottom:1px solid #e8e8e8;background:#fff;padding:16px 0">
+  <div style="display:flex;gap:64px;white-space:nowrap;animation:marquee 26s linear infinite;width:max-content">
+    <sc-for list="{{ marqueeItems }}" as="m" hint-placeholder-count="8">
+      <span style="font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:#0a0a0a;font-weight:600;display:flex;align-items:center;gap:64px">{{ m }} <span style="color:#c9c9c9">●</span></span>
+    </sc-for>
+  </div>
+</div>
+
+<section id="categories" style="padding:96px 56px 0">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:48px">
+    <h2 style="font-size:40px;font-weight:800;letter-spacing:-0.02em;margin:0">Shop by <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic">Category</em></h2>
+    <span style="font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:#9a9a9a;font-weight:500">04 Collections</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px">
+    <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="4">
+      <a href="#shop" style="display:flex;flex-direction:column;gap:14px">
+        <div style="position:relative;aspect-ratio:3/4;background:#f4f4f2;overflow:hidden">
+          <sc-if value="{{ cat.img }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ cat.img }}" alt="{{ cat.alt }}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease" style-hover="transform:scale(1.04)">
+          </sc-if>
+          <sc-if value="{{ cat.slot }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ cat.slot }}" shape="rect" placeholder="{{ cat.placeholder }}" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+          </sc-if>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;pointer-events:none">
+            <span style="font-size:14px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700">{{ cat.name }}</span>
+            <span style="font-size:12px;color:#9a9a9a;letter-spacing:0.08em">{{ cat.count }}</span>
+          </div>
+        </div>
+      </a>
+    </sc-for>
+  </div>
+</section>
+
+<section id="shop" style="padding:96px 56px 110px">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:48px">
+    <h2 style="font-size:40px;font-weight:800;letter-spacing:-0.02em;margin:0">New <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic">Arrivals</em></h2>
+    <span style="font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:#9a9a9a;font-weight:500">12 Styles</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px">
+    <sc-for list="{{ products }}" as="p" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:14px;cursor:pointer">
+        <div style="position:relative;aspect-ratio:4/5;background:#f4f4f2;overflow:hidden">
+          <sc-if value="{{ p.img }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ p.img }}" alt="{{ p.alt }}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease" style-hover="transform:scale(1.04)">
+          </sc-if>
+          <sc-if value="{{ p.slot }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ p.slot }}" shape="rect" placeholder="{{ p.placeholder }}" src="{{ p.src }}" credit="{{ p.credit }}" credit-href="{{ p.creditHref }}" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+          </sc-if>
+          <sc-if value="{{ p.tag }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:14px;left:14px;background:#0a0a0a;color:#fff;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding:6px 10px;font-weight:600;pointer-events:none">{{ p.tag }}</span>
+          </sc-if>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+          <span style="font-size:14px;font-weight:600;letter-spacing:0.02em">{{ p.name }}</span>
+          <span style="font-size:14px;color:#777">৳ {{ p.price }}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="lookbook" style="padding:96px 56px;background:#f4f4f2">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:48px">
+    <h2 style="font-size:40px;font-weight:800;letter-spacing:-0.02em;margin:0">Worn <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic">your way</em></h2>
+    <span style="font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:#9a9a9a;font-weight:500">The Lookbook / SS26</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:340px 340px;gap:28px">
+    <div style="position:relative;grid-row:1/3;background:#e9e9e6">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="look-1" shape="rect" placeholder="Drop model photo — full look" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+      <span style="position:absolute;top:18px;left:18px;background:#fff;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:8px 12px;font-weight:700;pointer-events:none">Look 01 — Oversized</span>
+    </div>
+    <div style="position:relative;background:#e9e9e6;grid-column:2;grid-row:1">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="look-2" shape="rect" placeholder="Drop street-style photo" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+      <span style="position:absolute;top:18px;left:18px;background:#fff;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:8px 12px;font-weight:700;pointer-events:none">Look 02 — Street</span>
+    </div>
+    <div style="position:relative;grid-column:3;grid-row:1/3;background:#e9e9e6">
+      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="look-3" shape="rect" placeholder="Drop model photo — polo look" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+      <span style="position:absolute;top:18px;left:18px;background:#fff;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:8px 12px;font-weight:700;pointer-events:none">Look 03 — Polo</span>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;color:#fff;padding:36px;grid-column:2;grid-row:2">
+      <span style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#8a8a8a;font-weight:600">Style it</span>
+      <p style="font-size:19px;line-height:1.55;margin:0;font-family:'Instrument Serif',serif">One tee, endless looks — layer it, tuck it, or let it drop loose.</p>
+      <a href="#shop" style="color:#fff;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;border-bottom:1px solid #fff;align-self:flex-start;padding-bottom:4px" style-hover="color:#bbb">Shop the looks →</a>
+    </div>
+  </div>
+</section>
+
+<section id="editorial" style="display:grid;grid-template-columns:1fr 1fr;min-height:620px;background:#0a0a0a;color:#fff">
+  <div style="position:relative;background:#1a1a1a">
+    <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="model-hero" shape="rect" placeholder="Drop model photo — wearing the tee" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&q=80" credit="Photo by Haryo Setyadi on Unsplash" credit-href="https://unsplash.com/@haryosetyadi" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+  </div>
+  <div style="display:flex;flex-direction:column;justify-content:center;padding:80px 72px;gap:26px">
+    <span style="font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:#8a8a8a;font-weight:600">The Fit</span>
+    <h2 style="font-size:56px;line-height:1.05;margin:0;font-weight:800;letter-spacing:-0.02em">Made to be <em style="font-family:'Instrument Serif',serif;font-weight:400;font-style:italic">worn</em>,<br>not posed.</h2>
+    <p style="font-size:16px;line-height:1.75;color:#b5b5b5;max-width:420px;margin:0">Boxy through the body, clean at the neck, sleeves that sit right at the elbow. Our oversized cut is drafted for real shoulders — not mannequins.</p>
+    <div style="display:flex;gap:40px;margin-top:8px">
+      <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:28px;font-weight:800">240</span><span style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a8a">GSM Fabric</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:28px;font-weight:800">S–XXL</span><span style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a8a">Sizes</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:28px;font-weight:800">04</span><span style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8a8a8a">Colorways</span></div>
+    </div>
+    <a href="#shop" style="background:#fff;color:#0a0a0a;padding:16px 36px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;font-weight:600;align-self:flex-start;margin-top:8px" style-hover="background:#ddd;color:#0a0a0a">Find your size</a>
+  </div>
+</section>
+
+<section style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #e8e8e8">
+  <sc-for list="{{ promises }}" as="pr" hint-placeholder-count="3">
+    <div style="padding:56px 48px;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:26px;font-weight:800;letter-spacing:-0.01em">{{ pr.title }}</span>
+      <span style="font-size:14px;line-height:1.7;color:#777">{{ pr.text }}</span>
+    </div>
+  </sc-for>
+</section>
+
+<section id="about" style="background:#0a0a0a;color:#fff;padding:110px 56px;text-align:center">
+  <div style="font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:#8a8a8a;font-weight:600;margin-bottom:24px">About the brand</div>
+  <p style="font-size:34px;line-height:1.4;font-weight:400;max-width:820px;margin:0 auto;font-family:'Instrument Serif',serif">“We started ANSClothes with one belief — you shouldn't have to choose between quality and simplicity. One tee at a time, we're building the new standard.”</p>
+  <sc-if value="{{ showComingSoon }}" hint-placeholder-val="{{ true }}">
+    <div id="coming" style="display:flex;gap:14px;justify-content:center;margin-top:48px">
+      <sc-for list="{{ comingItems }}" as="c" hint-placeholder-count="3">
+        <span style="border:1px solid #3a3a3a;color:#bdbdbd;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;padding:12px 22px;font-weight:500">{{ c }} — Coming Soon</span>
+      </sc-for>
+    </div>
+  </sc-if>
+</section>
+
+<footer style="padding:56px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e8e8e8">
+  <img src="assets/logo.png" alt="ANSClothes" style="height:26px;mix-blend-mode:multiply">
+  <div style="display:flex;gap:32px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;font-weight:500;color:#777">
+    <a href="#shop" style="color:#777">Shop</a>
+    <a href="#about" style="color:#777">About</a>
+    <a href="#contact" style="color:#777">Contact</a>
+  </div>
+  <span style="font-size:12px;color:#9a9a9a;letter-spacing:0.06em">© 2026 ANSClothes — www.ansclothes.com</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showAnnouncement&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;},&quot;showComingSoon&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showAnnouncement: this.props.showAnnouncement ?? true,
+      showComingSoon: this.props.showComingSoon ?? true,
+      marqueeItems: [
+        'Premium Quality','Heavyweight Cotton','Oversized Fit','Made in Bangladesh',
+        'Premium Quality','Heavyweight Cotton','Oversized Fit','Made in Bangladesh'
+      ],
+      promises: [
+        { title: '240 GSM Cotton', text: 'Heavyweight, pre-shrunk fabric that holds its shape wash after wash.' },
+        { title: 'Nationwide Delivery', text: 'Fast delivery across Bangladesh with cash on delivery available.' },
+        { title: '7-Day Exchange', text: 'Wrong size? Easy exchange within 7 days, no questions asked.' }
+      ],
+      comingItems: ['Pants','Shirts','Hoodies'],
+      categories: [
+        { name: 'T-Shirts', count: '12 Items', img: 'assets/tee-navy.jpg', alt: 'ANSClothes t-shirt collection' },
+        { name: 'Drop Shoulder', count: '08 Items', slot: 'cat-drop', placeholder: 'Drop shoulder photo' },
+        { name: 'Polo', count: '06 Items', slot: 'cat-polo', placeholder: 'Polo photo' },
+        { name: 'Pants', count: 'Coming Soon', slot: 'cat-pants', placeholder: 'Pants photo' }
+      ],
+      products: [
+        { name: 'The Navy Essential Tee', price: '850', img: 'assets/tee-navy.jpg', alt: 'Navy oversized premium t-shirt', tag: 'Featured' },
+        { name: 'The Black Essential Tee', price: '850', slot: 'tee-black', placeholder: 'Drop black tee photo' },
+        { name: 'The White Essential Tee', price: '850', slot: 'tee-white', placeholder: 'Drop white tee photo' },
+        { name: 'The Charcoal Essential Tee', price: '890', slot: 'tee-charcoal', placeholder: 'Drop charcoal tee photo', tag: 'New',
+          src: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80', credit: 'Photo by Keagan Henman on Unsplash', creditHref: 'https://unsplash.com/@keaganhenman' },
+        { name: 'Drop Shoulder — Onyx', price: '950', slot: 'ds-onyx', placeholder: 'Drop shoulder photo', tag: 'New' },
+        { name: 'Drop Shoulder — Cloud', price: '950', slot: 'ds-cloud', placeholder: 'Drop shoulder photo' },
+        { name: 'Classic Polo — Black', price: '1,150', slot: 'polo-black', placeholder: 'Polo photo', tag: 'New' },
+        { name: 'Classic Polo — Ivory', price: '1,150', slot: 'polo-ivory', placeholder: 'Polo photo' },
+        { name: 'Relaxed Pant — Black', price: '1,450', slot: 'pant-black', placeholder: 'Drop pant photo', tag: 'Pre-Order' },
+        { name: 'Relaxed Pant — Stone', price: '1,450', slot: 'pant-stone', placeholder: 'Drop pant photo' },
+        { name: 'Oxford Shirt — White', price: '1,650', slot: 'shirt-white', placeholder: 'Drop shirt photo', tag: 'Pre-Order' },
+        { name: 'Oxford Shirt — Black', price: '1,650', slot: 'shirt-black', placeholder: 'Drop shirt photo' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,5493 @@
+/*
+Theme Name: ANSClothes
+Theme URI: https://www.ansclothes.com
+Author: ANSClothes
+Author URI: https://www.ansclothes.com
+Description: Minimal editorial commerce theme for ANSClothes — premium heavyweight t-shirts made in Bangladesh. Includes a Product post type, category taxonomy and a fully customizable homepage.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: ansclothes
+Tags: e-commerce, minimal, editorial, custom-menu, custom-logo, featured-images, translation-ready
+*/
+
+/* ==========================================================================
+   1. Tokens
+   ========================================================================== */
+
+:root {
+	--ans-ink: #0a0a0a;
+	--ans-ink-soft: #555;
+	--ans-muted: #777;
+	--ans-faint: #9a9a9a;
+	--ans-line: #e8e8e8;
+	--ans-surface: #f4f4f2;
+	--ans-surface-alt: #e9e9e6;
+	--ans-paper: #f4efe6;
+	--ans-dark: #0a0a0a;
+	--ans-dark-2: #1a1a1a;
+	--ans-on-dark: #b5b5b5;
+	--ans-on-dark-faint: #8a8a8a;
+
+	--ans-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+	--ans-serif: 'Playfair Display', Georgia, serif;
+
+	--ans-gutter: 56px;
+	--ans-section: 96px;
+	--ans-gap: 28px;
+
+	/* Single source of truth for page width. Outer width includes the gutter
+	   padding (border-box), so the readable content column is
+	   --ans-container minus two gutters. Inner-only wrappers (those already
+	   inside a padded parent) use --ans-container-inner so they line up with
+	   it exactly; it derives from --ans-gutter so it stays correct at the
+	   breakpoints that shrink the gutter. */
+	--ans-container: 1520px;
+	--ans-container-inner: calc(var(--ans-container) - (var(--ans-gutter) * 2));
+
+	/* Legacy alias — kept so existing .ans-wrap sections stay in step with
+	   the container instead of drifting to their own width. */
+	--ans-maxw: var(--ans-container);
+
+	/* Warm editorial palette — used within the archive/shop UI */
+	--ans-gold: #a9814f;
+	--ans-gold-soft: #c9a877;
+	--ans-cream: #f8f2e6;
+	--ans-warm-line: #e6dcc8;
+	--ans-charcoal: #2b2420;
+	--ans-error: #b3261e;
+
+	/* Re-point WooCommerce's own design tokens at our palette — its core
+	   CSS (buttons, sale-price highlight, form borders) reads these
+	   variables directly, so without this it renders with WC's stock
+	   purple/olive defaults regardless of our own selectors. */
+	--woocommerce: var(--ans-charcoal);
+	--wc-primary: var(--ans-charcoal);
+	--wc-primary-text: var(--ans-cream);
+	--wc-secondary: var(--ans-warm-line);
+	--wc-secondary-text: var(--ans-charcoal);
+	--wc-highlight: var(--ans-gold);
+	--wc-highligh-text: var(--ans-cream);
+	--wc-content-bg: var(--ans-paper);
+	--wc-subtext: var(--ans-muted);
+	--wc-form-border-color: var(--ans-warm-line);
+
+	/* Cart glyph, used as a mask so it can inherit button text colour. */
+	--ans-cart-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.2' d='M16.608 9.421V6.906H3.392v8.016c0 .567.224 1.112.624 1.513.4.402.941.627 1.506.627H8.63M8.818 3h2.333c.618 0 1.212.247 1.649.686a2.35 2.35 0 0 1 .683 1.658v1.562H6.486V5.344c0-.622.246-1.218.683-1.658A2.33 2.33 0 0 1 8.82 3'/%3E%3Cpath stroke='%23000' stroke-linecap='round' stroke-width='1.2' d='M14.608 12.563v5m2.5-2.5h-5'/%3E%3C/svg%3E");
+	/* Buy-button glyphs, also used as masks so they can take the button's
+	   own colour (or a brand colour) rather than being baked in. */
+	--ans-bolt-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M13.5 2 4 14h6l-.5 8L20 10h-6.8z'/%3E%3C/svg%3E");
+	--ans-whatsapp-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.28-.1-.47-.15-.67.15s-.77.96-.94 1.16c-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.14-.14.3-.35.45-.53.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.66-1.61-.91-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.62.7.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.34m-5.42 7.4h-.01a9.9 9.9 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26C2.16 6.44 6.6 2 12.05 2c2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.44 9.89-9.88 9.89m8.41-18.3A11.8 11.8 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.9 11.9 0 0 0 5.69 1.44c6.55 0 11.89-5.33 11.89-11.89 0-3.18-1.23-6.17-3.48-8.41'/%3E%3C/svg%3E");
+	--ans-phone-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.28-.28.68-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1A17 17 0 0 1 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02z'/%3E%3C/svg%3E");
+
+	--ans-home-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 10.5 12 3l9 7.5' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5.5 9.5V20h13V9.5' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	--ans-user-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='8' r='3.6' stroke='%23000' stroke-width='1.8'/%3E%3Cpath d='M4.5 20a7.5 7.5 0 0 1 15 0' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+	--ans-phone-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5Z' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
+	--ans-pin-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10' r='2.6' stroke='%23000' stroke-width='1.8'/%3E%3C/svg%3E");
+	--ans-note-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M4 7h16M4 12h11M4 17h7' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+	--ans-check-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='9' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M8.5 12.3l2.4 2.4 4.6-4.9' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   2. Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	background: var(--ans-paper);
+	color: var(--ans-ink);
+	font-family: var(--ans-sans);
+	font-size: 16px;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow-x: hidden;
+}
+
+a {
+	color: var(--ans-ink);
+	text-decoration: none;
+	transition: color .25s ease, background-color .25s ease, border-color .25s ease;
+}
+
+a:hover,
+a:focus {
+	color: #555;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0 0 .5em;
+	font-weight: 800;
+	letter-spacing: -.02em;
+	line-height: 1.15;
+}
+
+p {
+	margin: 0 0 1.2em;
+}
+
+em.ans-serif,
+.ans-serif {
+	font-family: var(--ans-serif);
+	font-weight: 400;
+	font-style: normal;
+	letter-spacing: 0;
+}
+
+:focus-visible {
+	outline: 2px solid var(--ans-ink);
+	outline-offset: 3px;
+}
+
+.screen-reader-text {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute !important;
+	word-wrap: normal !important;
+}
+
+.skip-link {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 999;
+	background: var(--ans-ink);
+	color: #fff;
+	padding: 12px 20px;
+	font-size: 13px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+}
+
+.skip-link:focus {
+	left: 8px;
+	top: 8px;
+	color: #fff;
+}
+
+/* ==========================================================================
+   3. Layout helpers
+   ========================================================================== */
+
+/* Inner pages run their content inside --ans-container, so the header and
+   footer are constrained to match and everything lines up on one vertical
+   edge. The front page keeps its full-bleed treatment for the hero, so it
+   is excluded (`ans-front` is added on is_front_page()).
+
+   Backgrounds and border rules stay on the outer elements, so only the
+   contents are constrained — the bars themselves still span the viewport. */
+body:not(.ans-front) .ans-header__bar,
+body:not(.ans-front) .ans-header-search {
+	max-width: var(--ans-container);
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}
+
+/* These sit inside parents that already apply the gutter padding, so they
+   are capped at the inner width rather than the full container. */
+body:not(.ans-front) .ans-footer__main,
+body:not(.ans-front) .ans-footer__bottom {
+	max-width: var(--ans-container-inner);
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}
+
+/* Cart / checkout / account share the generic WooCommerce shell, which is
+   otherwise 1440px and so sits wider than the header and footer. Single
+   products are excluded because there div.product is the container itself. */
+body:not(.ans-front):not(.single-product) .ans-woocommerce.ans-wrap {
+	max-width: var(--ans-container);
+}
+
+.ans-wrap {
+	max-width: var(--ans-maxw);
+	margin: 0 auto;
+	padding-left: var(--ans-gutter);
+	padding-right: var(--ans-gutter);
+	width: 100%;
+}
+
+.ans-section {
+	padding-top: var(--ans-section);
+	padding-bottom: var(--ans-section);
+}
+
+.ans-section-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 48px;
+	flex-wrap: wrap;
+}
+
+.ans-section-head h2 {
+	font-size: 40px;
+	margin: 0;
+}
+
+.ans-eyebrow {
+	font-size: 12px;
+	letter-spacing: .24em;
+	text-transform: uppercase;
+	color: var(--ans-faint);
+	font-weight: 600;
+}
+
+.ans-meta {
+	font-size: 13px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--ans-faint);
+	font-weight: 500;
+}
+
+.ans-grid-4 {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: var(--ans-gap);
+}
+
+.ans-grid-3 {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--ans-gap);
+}
+
+/* ==========================================================================
+   4. Buttons
+   ========================================================================== */
+
+.ans-btn {
+	display: inline-block;
+	background: var(--ans-ink);
+	color: #fff;
+	padding: 16px 36px;
+	font-size: 13px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	font-weight: 600;
+	border: 1px solid var(--ans-ink);
+	cursor: pointer;
+	font-family: inherit;
+}
+
+.ans-btn:hover,
+.ans-btn:focus {
+	background: #333;
+	border-color: #333;
+	color: #fff;
+}
+
+.ans-btn--ghost {
+	background: transparent;
+	color: var(--ans-ink);
+	padding: 16px 28px;
+}
+
+.ans-btn--ghost:hover,
+.ans-btn--ghost:focus {
+	background: var(--ans-ink);
+	color: #fff;
+}
+
+.ans-btn--light {
+	background: #fff;
+	color: var(--ans-ink);
+	border-color: #fff;
+}
+
+.ans-btn--light:hover,
+.ans-btn--light:focus {
+	background: #ddd;
+	border-color: #ddd;
+	color: var(--ans-ink);
+}
+
+.ans-link-underline {
+	font-size: 12px;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	font-weight: 600;
+	border-bottom: 1px solid currentColor;
+	align-self: flex-start;
+	padding-bottom: 4px;
+}
+
+/* ==========================================================================
+   5. Header
+   ========================================================================== */
+
+.ans-announcement {
+	/* The custom properties are only set when the Customizer supplies a
+	   colour, so these values remain the default. */
+	background: var(--ans-announcement-bg, var(--ans-dark));
+	color: var(--ans-announcement-color, #fff);
+	font-size: 12px;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 10px 16px;
+	font-weight: 500;
+}
+
+.ans-announcement a {
+	color: inherit;
+	border-bottom: 1px solid currentColor;
+	opacity: .95;
+}
+
+/* Whole-bar link: no underline, since the entire strip is the target. */
+.ans-announcement__link {
+	border-bottom: 0;
+	color: inherit;
+}
+
+.ans-announcement__link:hover {
+	color: inherit;
+	opacity: .8;
+}
+
+.ans-header {
+	display: block;
+	padding: 0;
+	border-bottom: 1px solid var(--ans-warm-line);
+	background: var(--ans-paper);
+	position: sticky;
+	top: 0;
+	z-index: 50;
+}
+
+.admin-bar .ans-header {
+	top: 32px;
+}
+
+.ans-header__bar {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 24px;
+	min-height: 72px;
+	padding: 12px var(--ans-gutter);
+}
+
+.ans-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.ans-header__actions {
+	justify-content: flex-end;
+}
+
+.ans-branding {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 12px;
+	min-width: 0;
+}
+
+.ans-branding img,
+.ans-branding .custom-logo {
+	height: 40px;
+	max-width: min(220px, 46vw);
+	width: auto;
+	mix-blend-mode: multiply;
+}
+
+.ans-branding .ans-site-title {
+	font-size: 20px;
+	font-weight: 900;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+	margin: 0;
+}
+
+.ans-branding .ans-site-desc {
+	display: none;
+}
+
+.ans-icon-btn {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--ans-ink);
+	font-size: 20px;
+	font-weight: 800;
+	line-height: 1;
+	cursor: pointer;
+	transition: color .2s ease;
+}
+
+.ans-icon-btn:hover,
+.ans-icon-btn:focus {
+	color: var(--ans-muted);
+}
+
+.ans-icon,
+.ans-icon::before,
+.ans-icon::after {
+	box-sizing: border-box;
+	display: block;
+}
+
+.ans-icon {
+	position: relative;
+	width: 20px;
+	height: 20px;
+}
+
+.ans-icon--search {
+	width: 18px;
+	height: 18px;
+	border: 3px solid currentColor;
+	border-radius: 50%;
+}
+
+.ans-icon--search::after {
+	content: "";
+	position: absolute;
+	width: 9px;
+	height: 3px;
+	right: -7px;
+	bottom: -3px;
+	border-radius: 999px;
+	background: currentColor;
+	transform: rotate(45deg);
+}
+
+.ans-icon--user::before {
+	content: "";
+	position: absolute;
+	top: 1px;
+	left: 6px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.ans-icon--user::after {
+	content: "";
+	position: absolute;
+	left: 3px;
+	bottom: 1px;
+	width: 14px;
+	height: 9px;
+	border-radius: 9px 9px 3px 3px;
+	background: currentColor;
+}
+
+.ans-icon--bag {
+	width: 18px;
+	height: 16px;
+	margin-top: 3px;
+	border: 2px solid currentColor;
+	border-radius: 3px;
+}
+
+.ans-icon--bag::before {
+	content: "";
+	position: absolute;
+	left: 4px;
+	top: -8px;
+	width: 7px;
+	height: 8px;
+	border: 2px solid currentColor;
+	border-bottom: 0;
+	border-radius: 8px 8px 0 0;
+}
+
+.ans-cart-count {
+	position: absolute;
+	top: -4px;
+	right: -4px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 5px;
+	border-radius: 999px;
+	background: var(--ans-ink);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 800;
+}
+
+.ans-header-search {
+	display: none;
+	border-top: 1px solid var(--ans-warm-line);
+	padding: 14px var(--ans-gutter);
+	background: var(--ans-paper);
+}
+
+.ans-header-search.is-open {
+	display: block;
+}
+
+.ans-header-search input[type="search"] {
+	width: 100%;
+	max-width: 760px;
+	display: block;
+	margin: 0 auto;
+	border-radius: 999px;
+	padding: 14px 22px;
+}
+
+.ans-nav {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow-x: auto;
+	min-width: 0;
+}
+
+.ans-nav ul {
+	display: flex;
+	gap: 30px;
+	align-items: center;
+	justify-content: center;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	min-width: max-content;
+}
+
+.ans-nav a {
+	font-size: 14px;
+	letter-spacing: .01em;
+	text-transform: none;
+	font-weight: 500;
+}
+
+.ans-nav li.current-menu-item > a,
+.ans-nav li.current_page_item > a {
+	border-bottom: 1px solid var(--ans-gold);
+	padding-bottom: 3px;
+}
+
+.ans-nav a {
+	transition: color .2s ease;
+}
+
+.ans-nav a:hover {
+	color: var(--ans-gold);
+}
+
+/* Sub menus */
+.ans-nav ul ul {
+	display: none;
+	position: absolute;
+	background: var(--ans-paper);
+	border: 1px solid var(--ans-warm-line);
+	flex-direction: column;
+	gap: 0;
+	padding: 8px 0;
+	min-width: 190px;
+	z-index: 60;
+}
+
+.ans-nav li {
+	position: relative;
+}
+
+.ans-nav li:hover > ul,
+.ans-nav li:focus-within > ul {
+	display: flex;
+}
+
+.ans-nav ul ul a {
+	display: block;
+	padding: 10px 18px;
+	white-space: nowrap;
+}
+
+.ans-bag {
+	background: var(--ans-ink);
+	color: #fff;
+	padding: 11px 22px;
+	font-size: 13px;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	font-weight: 500;
+	flex-shrink: 0;
+}
+
+.ans-bag:hover,
+.ans-bag:focus {
+	background: #333;
+	color: #fff;
+}
+
+.ans-nav-toggle {
+	display: none;
+	background: none;
+	border: 1px solid var(--ans-ink);
+	padding: 10px 14px;
+	font-size: 12px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	font-weight: 600;
+	font-family: inherit;
+	cursor: pointer;
+}
+
+/* ==========================================================================
+   6. Hero
+   ========================================================================== */
+
+.ans-hero {
+	position: relative;
+	display: block;
+	min-height: clamp(380px, 47vw, 760px);
+	border-bottom: 1px solid var(--ans-warm-line);
+	overflow: hidden;
+	background: var(--ans-surface);
+}
+
+.ans-hero__slides {
+	position: absolute;
+	inset: 0;
+}
+
+.ans-hero__slide {
+	position: absolute;
+	inset: 0;
+	display: block;
+	opacity: 0;
+	transition: opacity .7s ease;
+}
+
+.ans-hero__slide.is-active {
+	opacity: 1;
+	z-index: 1;
+}
+
+.ans-hero__slide img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+}
+
+.ans-hero__dots {
+	position: absolute;
+	left: 50%;
+	bottom: 22px;
+	z-index: 2;
+	display: flex;
+	gap: 8px;
+	transform: translateX(-50%);
+}
+
+.ans-hero__dots span {
+	width: 28px;
+	height: 3px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, .55);
+}
+
+.ans-hero__dots span.is-active {
+	background: #fff;
+}
+
+/* ==========================================================================
+   7. Marquee
+   ========================================================================== */
+
+.ans-marquee {
+	overflow: hidden;
+	border-bottom: 1px solid var(--ans-warm-line);
+	background: var(--ans-paper);
+	padding: 16px 0;
+}
+
+.ans-marquee__track {
+	display: flex;
+	gap: 64px;
+	white-space: nowrap;
+	width: max-content;
+	animation: ansMarquee 26s linear infinite;
+}
+
+.ans-marquee__item {
+	font-size: 13px;
+	letter-spacing: .22em;
+	text-transform: uppercase;
+	color: var(--ans-ink);
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 64px;
+}
+
+.ans-marquee__item::after {
+	content: '\25CF';
+	color: #c9c9c9;
+	letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ans-marquee__track {
+		animation: none;
+	}
+	html {
+		scroll-behavior: auto;
+	}
+}
+
+/* ==========================================================================
+   8. Cards (categories + products)
+   ========================================================================== */
+
+.ans-card {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.ans-card__media {
+	position: relative;
+	background: var(--ans-surface);
+	overflow: hidden;
+	display: block;
+}
+
+.ans-cat .ans-card__media {
+	aspect-ratio: 3 / 4;
+}
+
+.ans-product .ans-card__media {
+	aspect-ratio: 4 / 5;
+}
+
+.ans-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform .5s ease;
+}
+
+.ans-card:hover .ans-card__media img,
+.ans-card:focus-within .ans-card__media img {
+	transform: scale(1.04);
+}
+
+.ans-card__placeholder {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 20px;
+	font-size: 12px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: #b3b3ae;
+	font-weight: 600;
+	background: var(--ans-surface);
+}
+
+.ans-cat__label {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: var(--ans-paper);
+	padding: 16px 18px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+	pointer-events: none;
+}
+
+.ans-cat__label strong {
+	font-size: 14px;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	font-weight: 700;
+}
+
+.ans-cat__label span {
+	font-size: 12px;
+	color: var(--ans-faint);
+	letter-spacing: .08em;
+}
+
+.ans-badge {
+	position: absolute;
+	top: 14px;
+	left: 14px;
+	background: var(--ans-ink);
+	color: #fff;
+	font-size: 10px;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	padding: 6px 10px;
+	font-weight: 600;
+	pointer-events: none;
+	z-index: 2;
+}
+
+.ans-product__row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.ans-product__name {
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: .02em;
+}
+
+.ans-product__price {
+	font-size: 14px;
+	color: var(--ans-muted);
+	white-space: nowrap;
+}
+
+.ans-product__price ins,
+.ans-home-product__price ins,
+.ans-single-product__price ins,
+.price ins {
+	text-decoration: none;
+}
+
+/* ==========================================================================
+   9. Lookbook
+   ========================================================================== */
+
+.ans-lookbook {
+	background: var(--ans-surface);
+}
+
+.ans-lookbook__grid {
+	display: grid;
+	grid-template-columns: 1.4fr 1fr 1fr;
+	grid-template-rows: 340px 340px;
+	gap: var(--ans-gap);
+}
+
+.ans-look {
+	position: relative;
+	background: var(--ans-surface-alt);
+	overflow: hidden;
+}
+
+.ans-look img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ans-look:nth-child(1) {
+	grid-row: 1 / 3;
+}
+
+.ans-look:nth-child(2) {
+	grid-column: 2;
+	grid-row: 1;
+}
+
+.ans-look:nth-child(3) {
+	grid-column: 3;
+	grid-row: 1 / 3;
+}
+
+.ans-look__tag {
+	position: absolute;
+	top: 18px;
+	left: 18px;
+	background: var(--ans-paper);
+	font-size: 11px;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	padding: 8px 12px;
+	font-weight: 700;
+	pointer-events: none;
+}
+
+.ans-lookbook__note {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 18px;
+	background: var(--ans-dark);
+	color: #fff;
+	padding: 36px;
+	grid-column: 2;
+	grid-row: 2;
+}
+
+.ans-lookbook__note p {
+	font-size: 19px;
+	line-height: 1.55;
+	margin: 0;
+	font-family: var(--ans-serif);
+}
+
+.ans-lookbook__note .ans-eyebrow {
+	color: var(--ans-on-dark-faint);
+	letter-spacing: .22em;
+}
+
+.ans-lookbook__note a {
+	color: #fff;
+}
+
+.ans-lookbook__note a:hover,
+.ans-lookbook__note a:focus {
+	color: #bbb;
+}
+
+/* ==========================================================================
+   10. Editorial
+   ========================================================================== */
+
+.ans-editorial {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	min-height: 620px;
+	background: var(--ans-dark);
+	color: #fff;
+}
+
+.ans-editorial__media {
+	position: relative;
+	background: var(--ans-dark-2);
+	min-height: 380px;
+	overflow: hidden;
+}
+
+.ans-editorial__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ans-editorial__text {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 80px 72px;
+	gap: 26px;
+}
+
+.ans-editorial__text h2 {
+	font-size: 56px;
+	line-height: 1.05;
+	margin: 0;
+}
+
+.ans-editorial__text p {
+	font-size: 16px;
+	line-height: 1.75;
+	color: var(--ans-on-dark);
+	max-width: 420px;
+	margin: 0;
+}
+
+.ans-editorial .ans-eyebrow {
+	color: var(--ans-on-dark-faint);
+}
+
+.ans-stats {
+	display: flex;
+	gap: 40px;
+	margin-top: 8px;
+	flex-wrap: wrap;
+}
+
+.ans-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.ans-stat strong {
+	font-size: 28px;
+	font-weight: 800;
+}
+
+.ans-stat span {
+	font-size: 11px;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	color: var(--ans-on-dark-faint);
+}
+
+/* ==========================================================================
+   11. Promises
+   ========================================================================== */
+
+.ans-promises {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	border-bottom: 1px solid var(--ans-warm-line);
+}
+
+.ans-promise {
+	padding: 56px 48px;
+	border-right: 1px solid var(--ans-warm-line);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.ans-promise:last-child {
+	border-right: 0;
+}
+
+.ans-promise strong {
+	font-size: 26px;
+	font-weight: 800;
+	letter-spacing: -.01em;
+}
+
+.ans-promise span {
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ans-muted);
+}
+
+/* ==========================================================================
+   12. About
+   ========================================================================== */
+
+.ans-about {
+	background: var(--ans-dark);
+	color: #fff;
+	padding: 110px var(--ans-gutter);
+	text-align: center;
+}
+
+.ans-about .ans-eyebrow {
+	color: var(--ans-on-dark-faint);
+	margin-bottom: 24px;
+	display: block;
+}
+
+.ans-about blockquote {
+	font-size: 34px;
+	line-height: 1.4;
+	font-weight: 400;
+	max-width: 820px;
+	margin: 0 auto;
+	font-family: var(--ans-serif);
+}
+
+.ans-about blockquote p {
+	margin: 0;
+}
+
+.ans-coming {
+	display: flex;
+	gap: 14px;
+	justify-content: center;
+	margin-top: 48px;
+	flex-wrap: wrap;
+}
+
+.ans-coming span {
+	border: 1px solid #3a3a3a;
+	color: #bdbdbd;
+	font-size: 12px;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	padding: 12px 22px;
+	font-weight: 500;
+}
+
+/* ==========================================================================
+   13. Footer
+   ========================================================================== */
+
+.ans-prefooter {
+	background: #f4efe6;
+	padding: 28px var(--ans-gutter) 54px;
+}
+
+.ans-prefooter__features {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	margin-bottom: 48px;
+}
+
+.ans-prefooter__shop h2 {
+	margin: 0 0 26px;
+	font-family: var(--ans-serif);
+	font-size: 28px;
+	font-weight: 400;
+	letter-spacing: 0;
+}
+
+.ans-prefooter__grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(260px, 1fr));
+	gap: 24px;
+	overflow-x: auto;
+	padding-bottom: 10px;
+}
+
+.ans-prefooter-card {
+	position: relative;
+	display: block;
+	min-height: 210px;
+	overflow: hidden;
+	background: var(--ans-surface);
+	color: #fff;
+}
+
+.ans-prefooter-card--large {
+	min-height: 300px;
+}
+
+.ans-prefooter-card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, .56));
+	z-index: 1;
+}
+
+.ans-prefooter-card img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform .5s ease;
+}
+
+.ans-prefooter-card:hover img,
+.ans-prefooter-card:focus img {
+	transform: scale(1.04);
+}
+
+.ans-prefooter-card span {
+	position: absolute;
+	left: 24px;
+	bottom: 22px;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.ans-prefooter-card strong {
+	font-family: var(--ans-serif);
+	font-size: 25px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 1;
+	text-shadow: 0 1px 12px rgba(0, 0, 0, .32);
+}
+
+.ans-prefooter-card em {
+	border: 1px solid rgba(255, 255, 255, .86);
+	padding: 9px 20px;
+	font-family: var(--ans-sans);
+	font-size: 11px;
+	font-style: normal;
+	font-weight: 800;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.ans-newsletter {
+	background: #171411;
+	color: #fff;
+	text-align: center;
+	padding: 62px var(--ans-gutter);
+}
+
+.ans-newsletter h2 {
+	margin: 0 0 12px;
+	font-family: var(--ans-serif);
+	font-size: 30px;
+	font-style: normal;
+	font-weight: 500;
+	letter-spacing: 0;
+}
+
+.ans-newsletter p {
+	margin: 0 0 28px;
+	color: rgba(255, 255, 255, .64);
+	font-size: 13px;
+}
+
+.ans-newsletter__form {
+	display: flex;
+	justify-content: center;
+	max-width: 440px;
+	margin: 0 auto;
+}
+
+.ans-newsletter__form input {
+	min-width: 0;
+	flex: 1;
+	border-color: rgba(255, 255, 255, .22);
+	background: transparent;
+	color: #fff;
+}
+
+.ans-newsletter__form button {
+	border: 0;
+	background: #c95f35;
+	color: #fff;
+	padding: 0 28px;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.ans-footer-widgets {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--ans-gap);
+	padding: 64px var(--ans-gutter);
+	border-top: 1px solid var(--ans-warm-line);
+}
+
+.ans-footer-widgets .widget-title {
+	font-size: 13px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	font-weight: 700;
+	margin-bottom: 16px;
+}
+
+.ans-footer-widgets ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	font-size: 14px;
+	color: var(--ans-muted);
+}
+
+.ans-footer {
+	background: #f4efe6;
+	padding: 56px var(--ans-gutter) 24px;
+	border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.ans-footer img {
+	height: 30px;
+	width: auto;
+	mix-blend-mode: multiply;
+}
+
+.ans-footer__main {
+	display: grid;
+	grid-template-columns: 1.4fr repeat(3, 1fr);
+	gap: clamp(28px, 5vw, 84px);
+	align-items: start;
+	padding-bottom: 42px;
+}
+
+.ans-footer__brand {
+	max-width: 280px;
+}
+
+.ans-footer__brand p,
+.ans-footer__col p {
+	margin: 18px 0 0;
+	color: rgba(0, 0, 0, .58);
+	font-size: 13px;
+	line-height: 1.8;
+}
+
+.ans-footer__brand strong {
+	display: block;
+	margin-top: 18px;
+	font-size: 13px;
+}
+
+.ans-footer__col h2 {
+	margin: 0 0 18px;
+	font-size: 12px;
+	font-weight: 900;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.ans-footer__col ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.ans-footer__col a,
+.ans-footer__social a {
+	color: rgba(0, 0, 0, .58);
+	font-size: 13px;
+}
+
+.ans-footer__col a:hover,
+.ans-footer__col a:focus,
+.ans-footer__social a:hover,
+.ans-footer__social a:focus {
+	color: var(--ans-ink);
+}
+
+.ans-footer__bottom {
+	display: flex;
+	justify-content: space-between;
+	gap: 24px;
+	border-top: 1px solid rgba(0, 0, 0, .1);
+	padding-top: 24px;
+}
+
+.ans-footer__copy {
+	font-size: 12px;
+	color: var(--ans-faint);
+	letter-spacing: 0;
+}
+
+.ans-footer__social {
+	display: flex;
+	gap: 24px;
+}
+
+/* ==========================================================================
+   14. Content pages / posts
+   ========================================================================== */
+
+.ans-page-header {
+	padding: 72px var(--ans-gutter) 0;
+	/* Same container as the header and footer so page titles start on the
+	   same vertical edge as the logo. */
+	max-width: var(--ans-container);
+	margin: 0 auto;
+}
+
+.ans-page-header h1 {
+	font-size: 52px;
+	margin: 0 0 16px;
+}
+
+.ans-content {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 56px var(--ans-gutter) 96px;
+	font-size: 17px;
+	line-height: 1.8;
+	color: #222;
+}
+
+.ans-content h2 {
+	font-size: 32px;
+	margin-top: 1.6em;
+}
+
+.ans-content h3 {
+	font-size: 24px;
+	margin-top: 1.4em;
+}
+
+.ans-content img,
+.ans-content .wp-caption {
+	margin: 32px 0;
+}
+
+.ans-content blockquote {
+	margin: 32px 0;
+	padding-left: 24px;
+	border-left: 2px solid var(--ans-ink);
+	font-family: var(--ans-serif);
+	font-size: 22px;
+	line-height: 1.5;
+}
+
+.ans-content ul,
+.ans-content ol {
+	padding-left: 22px;
+}
+
+.ans-content table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.ans-content td,
+.ans-content th {
+	border: 1px solid var(--ans-warm-line);
+	padding: 10px 12px;
+	text-align: left;
+}
+
+.ans-content pre {
+	background: var(--ans-surface);
+	padding: 18px;
+	overflow-x: auto;
+}
+
+.ans-archive {
+	padding: 64px var(--ans-gutter) 96px;
+	max-width: var(--ans-maxw);
+	margin: 0 auto;
+}
+
+.ans-post-card {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.ans-post-card__media {
+	aspect-ratio: 4 / 3;
+	background: var(--ans-surface);
+	overflow: hidden;
+}
+
+.ans-post-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform .5s ease;
+}
+
+.ans-post-card:hover .ans-post-card__media img {
+	transform: scale(1.04);
+}
+
+.ans-post-card h2 {
+	font-size: 20px;
+	margin: 0;
+	letter-spacing: -.01em;
+}
+
+.ans-post-card p {
+	color: var(--ans-muted);
+	font-size: 15px;
+	margin: 0;
+}
+
+.ans-date {
+	font-size: 12px;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--ans-faint);
+}
+
+.ans-empty {
+	padding: 40px 0 0;
+	color: var(--ans-muted);
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	align-items: flex-start;
+}
+
+.ans-term-desc {
+	color: var(--ans-muted);
+	max-width: 560px;
+}
+
+.ans-pagination {
+	margin-top: 64px;
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.ans-pagination .page-numbers {
+	border: 1px solid var(--ans-warm-line);
+	padding: 10px 16px;
+	font-size: 13px;
+	letter-spacing: .08em;
+}
+
+.ans-pagination .page-numbers.current,
+.ans-pagination .page-numbers:hover {
+	background: var(--ans-ink);
+	color: #fff;
+	border-color: var(--ans-ink);
+}
+
+/* Single product */
+.ans-single-product {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0;
+	border-bottom: 1px solid var(--ans-warm-line);
+}
+
+.ans-single-product__media {
+	position: relative;
+	background: var(--ans-surface);
+	min-height: 520px;
+}
+
+.ans-single-product__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ans-single-product__info {
+	padding: 80px 72px;
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+	justify-content: center;
+}
+
+.ans-single-product__info h1 {
+	font-size: 44px;
+	margin: 0;
+}
+
+.ans-single-product__price {
+	font-size: 22px;
+	color: var(--ans-ink-soft);
+}
+
+.ans-sizes {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.ans-sizes span {
+	border: 1px solid var(--ans-warm-line);
+	padding: 10px 16px;
+	font-size: 12px;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	font-weight: 600;
+}
+
+.ans-gallery {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--ans-gap);
+	padding: var(--ans-section) var(--ans-gutter);
+}
+
+/* Comments + forms */
+.ans-comments {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 0 var(--ans-gutter) 96px;
+}
+
+.ans-comments ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ans-comments .comment-body {
+	border-top: 1px solid var(--ans-warm-line);
+	padding: 24px 0;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+textarea,
+select {
+	width: 100%;
+	border: 1px solid var(--ans-warm-line);
+	background: #fff;
+	padding: 14px 16px;
+	font-family: inherit;
+	font-size: 15px;
+	color: var(--ans-ink);
+	border-radius: 0;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+	border-color: var(--ans-ink);
+	outline: none;
+}
+
+input[type="submit"],
+button {
+	font-family: inherit;
+}
+
+.ans-search-form {
+	display: flex;
+	gap: 0;
+	max-width: 460px;
+}
+
+.ans-search-form input[type="search"] {
+	border-right: 0;
+}
+
+.ans-404 {
+	text-align: center;
+	padding: 140px var(--ans-gutter);
+}
+
+.ans-404 h1 {
+	font-size: 96px;
+	margin: 0 0 12px;
+}
+
+/* ==========================================================================
+   Archive page redesign — header, sidebar filters, product grid
+   ========================================================================== */
+
+/* ── Archive Header ── */
+.ans-archive-header {
+	text-align: center;
+	padding: 22px 4% 22px;
+	background: var(--ans-paper);
+}
+
+.ans-archive-title {
+	font-family: var(--ans-serif);
+	font-size: clamp(36px, 5vw, 64px);
+	font-weight: 500;
+	font-style: normal;
+	letter-spacing: -.01em;
+	color: var(--ans-ink);
+	margin: 0 0 24px;
+	line-height: 1.1;
+}
+
+.ans-archive-divider {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.ans-archive-divider__line {
+	display: block;
+	width: clamp(60px, 14vw, 180px);
+	height: 1px;
+	background: var(--ans-warm-line);
+}
+
+.ans-archive-divider__icon {
+	width: 14px;
+	height: 14px;
+	color: var(--ans-gold);
+	flex-shrink: 0;
+}
+
+.ans-archive-desc {
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ans-muted);
+	max-width: 480px;
+	margin: 0 auto;
+	font-weight: 400;
+}
+
+/* ── Archive Shell (sidebar + grid) ── */
+.ans-archive-shell {
+	display: grid;
+	/* The sidebar was a fixed 260px, so widening the container sent all of
+	   the extra space to the product grid. Scaling it with the viewport
+	   keeps the two columns in proportion, with the clamp stopping it from
+	   getting cramped on small laptops or oversized on very wide screens. */
+	grid-template-columns: clamp(260px, 22vw, 340px) 1fr;
+	gap: 44px;
+	align-items: start;
+	padding: 48px var(--ans-gutter) 96px;
+	max-width: var(--ans-container);
+	margin: 0 auto;
+}
+
+/* ── Filter Sidebar ── */
+.ans-filter-sidebar {
+	position: sticky;
+	top: calc(72px + 16px);
+	background: transparent;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 8px;
+	padding: 24px;
+	overflow: visible;
+}
+
+.admin-bar .ans-filter-sidebar {
+	top: calc(72px + 32px + 16px);
+}
+
+.ans-filter-sidebar__title {
+	font-size: 20px;
+	font-weight: 700;
+	letter-spacing: -.01em;
+	text-transform: none;
+	margin: 0;
+	padding: 0 0 18px;
+	border-bottom: 1px solid var(--ans-warm-line);
+	color: var(--ans-ink);
+}
+
+.ans-filter-group {
+	border-bottom: 1px solid var(--ans-warm-line);
+}
+
+.ans-filter-group:last-child {
+	border-bottom: 0;
+}
+
+.ans-filter-group__toggle {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	background: none;
+	border: 0;
+	padding: 18px 0 14px;
+	font-family: inherit;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: -.005em;
+	text-transform: none;
+	color: var(--ans-ink);
+	cursor: pointer;
+	text-align: left;
+	transition: color .2s ease;
+}
+
+.ans-filter-group__toggle:hover {
+	color: var(--ans-muted);
+}
+
+.ans-chevron {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+	transition: transform .25s ease;
+}
+
+.ans-filter-group__toggle[aria-expanded="false"] .ans-chevron {
+	transform: rotate(-90deg);
+}
+
+.ans-filter-group__body {
+	padding: 0 0 18px;
+	overflow: hidden;
+}
+
+.ans-filter-group__toggle[aria-expanded="false"] + .ans-filter-group__body {
+	display: none;
+}
+
+/* WooCommerce widgets inside sidebar */
+.ans-filter-sidebar .widget {
+	margin: 0;
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider_wrapper {
+	padding: 8px 0;
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider {
+	margin-bottom: 12px;
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider {
+	position: relative;
+	background: linear-gradient(90deg, var(--ans-charcoal) 0%, var(--ans-gold) 100%);
+	border-radius: 999px;
+	height: 4px;
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-range {
+	background: transparent;
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle {
+	width: 14px;
+	height: 14px;
+	top: -5px;
+	background: var(--ans-cream);
+	border: 2px solid var(--ans-charcoal);
+	border-radius: 50%;
+	box-shadow: 0 1px 4px rgba(0,0,0,.18);
+	cursor: pointer;
+	transition: transform .15s ease;
+	outline: none;
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle:hover,
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle:focus {
+	transform: scale(1.15);
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle:first-of-type {
+	width: 12px;
+	height: 12px;
+	top: -4px;
+	border-radius: 3px;
+	background: var(--ans-cream);
+	border: 2px solid var(--ans-charcoal);
+	transform: rotate(45deg);
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle:first-of-type:hover,
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle:first-of-type:focus {
+	transform: rotate(45deg) scale(1.15);
+}
+
+.ans-filter-sidebar .widget_price_filter .ui-slider .ui-slider-handle:last-of-type {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider_amount {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 10px;
+	flex-wrap: wrap;
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider_amount .price_label,
+.ans-filter-sidebar .widget_price_filter .price_slider_amount span {
+	font-size: 12px;
+	color: var(--ans-muted);
+	letter-spacing: .04em;
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider_amount input[type="text"] {
+	width: 80px;
+	border: 1px solid var(--ans-warm-line);
+	font-size: 12px;
+	padding: 7px 10px;
+	background: transparent;
+	color: var(--ans-charcoal);
+	border-radius: 4px;
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider_amount button {
+	display: none;
+}
+
+.ans-filter-sidebar .widget_price_filter .price_slider_amount p.price {
+	font-size: 12px;
+	color: var(--ans-muted);
+	margin: 8px 0 0;
+	width: 100%;
+}
+
+.ans-filter-sidebar .ans-price-fallback {
+	font-size: 12px;
+	color: var(--ans-muted);
+	margin: 0;
+}
+
+/* Category widget in sidebar */
+.ans-filter-sidebar .product-categories {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.ans-filter-sidebar .product-categories li {
+	border-radius: 0;
+}
+
+.ans-filter-sidebar .product-categories li a {
+	display: inline-block;
+	padding: 9px 0;
+	font-size: 14px;
+	color: var(--ans-muted);
+	border-radius: 999px;
+	transition: all .2s ease;
+}
+
+.ans-filter-sidebar .product-categories li a:hover {
+	color: var(--ans-ink);
+	background: transparent;
+}
+
+.ans-filter-sidebar .product-categories li.current-cat > a {
+	color: var(--ans-charcoal);
+	font-weight: 600;
+	padding: 9px 18px;
+	border: 1px solid var(--ans-gold-soft);
+	background: var(--ans-cream);
+}
+
+/* Layered nav (sizes) widget + custom size-filter pills */
+.ans-filter-sidebar .wc-layered-nav-list,
+.ans-filter-sidebar .ans-size-filter-list {
+	list-style: none;
+	margin: 4px 0 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.ans-filter-sidebar .wc-layered-nav-list li a,
+.ans-filter-sidebar .ans-size-filter-list li a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 38px;
+	height: 32px;
+	padding: 0 10px;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: var(--ans-charcoal);
+	transition: all .2s ease;
+}
+
+.ans-filter-sidebar .wc-layered-nav-list li a:hover,
+.ans-filter-sidebar .wc-layered-nav-list li.chosen a,
+.ans-filter-sidebar .ans-size-filter-list li a:hover,
+.ans-filter-sidebar .ans-size-filter-list li a.is-selected {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+.ans-filter-sidebar .wc-layered-nav-list .count {
+	display: none;
+}
+
+/* Availability checkboxes */
+.ans-availability-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.ans-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	font-size: 14px;
+	color: var(--ans-muted);
+	user-select: none;
+}
+
+.ans-checkbox input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.ans-checkbox__box {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	min-width: 16px;
+	border: 1px solid var(--ans-warm-line);
+	background: transparent;
+	transition: all .2s ease;
+}
+
+.ans-checkbox input[type="checkbox"]:checked + .ans-checkbox__box {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+}
+
+.ans-checkbox input[type="checkbox"]:checked + .ans-checkbox__box::after {
+	content: '';
+	width: 8px;
+	height: 5px;
+	border-left: 1.5px solid var(--ans-cream);
+	border-bottom: 1.5px solid var(--ans-cream);
+	transform: rotate(-45deg) translateY(-1px);
+	display: block;
+}
+
+/* ── Archive Toolbar ── */
+.ans-archive-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 32px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid var(--ans-warm-line);
+	flex-wrap: wrap;
+}
+
+.ans-archive-count {
+	font-size: 13px;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--ans-muted);
+	font-weight: 500;
+}
+
+.ans-archive-toolbar__right {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+/* WooCommerce ordering select inside toolbar */
+.ans-archive-toolbar .woocommerce-ordering {
+	margin: 0;
+}
+
+.ans-archive-toolbar .woocommerce-ordering select {
+	width: auto;
+	border: 1px solid var(--ans-warm-line);
+	background: transparent;
+	padding: 8px 32px 8px 12px;
+	font-size: 12px;
+	cursor: pointer;
+	color: var(--ans-charcoal);
+	font-family: inherit;
+	letter-spacing: .04em;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23777' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 10px center;
+	border-radius: 4px;
+}
+
+/* Layout toggle buttons */
+.ans-layout-toggle {
+	display: flex;
+	gap: 1px;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.ans-layout-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 30px;
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	color: var(--ans-faint);
+	transition: all .2s ease;
+	padding: 0;
+}
+
+.ans-layout-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.ans-layout-btn:hover,
+.ans-layout-btn.is-active {
+	background: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+/* ── Product Grid inside archive ── */
+.ans-archive-products ul.products {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--ans-gap);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Neutralize WooCommerce's legacy float clearfix — under CSS Grid these
+   ::before/::after boxes are treated as real grid items and eat a cell.
+   Applies to every product grid, not just the archive: the related
+   products grid hit the same bug and pushed its last card onto a new row. */
+.ans-archive-products ul.products::before,
+.ans-archive-products ul.products::after,
+.single-product .related.products ul.products::before,
+.single-product .related.products ul.products::after,
+.single-product .up-sells ul.products::before,
+.single-product .up-sells ul.products::after {
+	display: none;
+}
+
+.ans-archive-products[data-cols="4"] ul.products {
+	grid-template-columns: repeat(4, 1fr);
+}
+
+/* WooCommerce .woocommerce-result-count / loop pagination */
+.ans-archive-products .woocommerce-result-count {
+	display: none; /* shown in our toolbar instead */
+}
+
+.ans-archive-products nav.woocommerce-pagination {
+	margin-top: 56px;
+}
+
+/* ── Product Card (ans-pcard) ── */
+.ans-pcard {
+	display: flex;
+	flex-direction: column;
+	background: transparent;
+	position: relative;
+}
+
+/* Image area */
+.ans-pcard__media {
+	display: block;
+	position: relative;
+	aspect-ratio: 3 / 4;
+	background: var(--ans-cream);
+	overflow: hidden;
+}
+
+.ans-pcard__media a {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.ans-pcard__img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	transition: transform .6s cubic-bezier(.25, .46, .45, .94);
+}
+
+.ans-pcard:hover .ans-pcard__img {
+	transform: scale(1.05);
+}
+
+.ans-pcard__badge {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	background: var(--ans-charcoal);
+	color: var(--ans-cream);
+	font-size: 9px;
+	letter-spacing: .2em;
+	text-transform: uppercase;
+	padding: 5px 10px;
+	font-weight: 700;
+	z-index: 3;
+	pointer-events: none;
+	border-radius: 0;
+}
+
+/* Info area */
+.ans-pcard__info {
+	padding: 14px 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1;
+}
+
+.ans-pcard__name {
+	font-size: 14px;
+	font-weight: 500;
+	letter-spacing: .01em;
+	margin: 0;
+	line-height: 1.4;
+	text-align: left;
+	font-family: var(--ans-serif);
+	font-style: normal;
+}
+
+.ans-pcard__name a {
+	color: var(--ans-ink);
+	text-decoration: none;
+}
+
+.ans-pcard__name a:hover {
+	color: var(--ans-muted);
+}
+
+.ans-pcard__price {
+	font-size: 13px;
+	color: var(--ans-ink);
+	text-align: left;
+	font-weight: 600;
+	letter-spacing: .02em;
+}
+
+.ans-pcard__price ins {
+	text-decoration: none;
+	font-weight: 600;
+	color: var(--ans-ink);
+}
+
+.ans-pcard__price del {
+	font-size: 12px;
+	opacity: .5;
+	margin-right: 6px;
+}
+
+/* Size chips */
+.ans-pcard__sizes {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-top: 4px;
+}
+
+.ans-pcard__size {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 26px;
+	padding: 0 8px;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 4px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+	color: var(--ans-charcoal);
+	line-height: 1;
+	background: transparent;
+	transition: border-color .2s ease;
+}
+
+.ans-pcard:hover .ans-pcard__size {
+	border-color: var(--ans-gold-soft);
+}
+
+/* Pushed to the bottom of the card so the buttons line up across a row
+   even when some product names wrap onto a second line. */
+.ans-pcard__actions {
+	margin-top: auto;
+}
+
+/* Add to cart button */
+.ans-pcard__atc {
+	display: block;
+	width: 100%;
+	padding: 11px 16px;
+	border: 1px solid var(--ans-gold-soft);
+	background: transparent;
+	color: var(--ans-charcoal);
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	text-align: center;
+	cursor: pointer;
+	font-family: inherit;
+	transition: all .22s ease;
+	margin-top: 12px;
+	text-decoration: none;
+}
+
+.ans-pcard__atc:hover,
+.ans-pcard__atc:focus {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+.ans-pcard__atc--oos {
+	background: transparent;
+	border-color: var(--ans-warm-line);
+	color: var(--ans-faint);
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.ans-pcard__atc--oos:hover {
+	background: transparent;
+	border-color: var(--ans-warm-line);
+	color: var(--ans-faint);
+}
+
+/* Mobile filter toggle button */
+.ans-filter-mobile-toggle {
+	display: none;
+	align-items: center;
+	gap: 8px;
+	background: var(--ans-charcoal);
+	color: var(--ans-cream);
+	border: 0;
+	padding: 12px 20px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	cursor: pointer;
+	font-family: inherit;
+	margin-bottom: 20px;
+}
+
+/* WooCommerce */
+.ans-woocommerce {
+	padding: var(--ans-section) var(--ans-gutter);
+}
+
+.ans-woocommerce .woocommerce-products-header,
+.ans-woocommerce .product_title,
+.ans-woocommerce .entry-title {
+	margin-bottom: 28px;
+}
+
+.ans-woocommerce .woocommerce-result-count,
+.ans-woocommerce .woocommerce-ordering {
+	margin-bottom: 24px;
+}
+
+.ans-woocommerce ul.products {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: var(--ans-gap);
+	margin: 0;
+	padding: 0;
+}
+
+.ans-woocommerce ul.products li.product {
+	width: auto;
+	margin: 0;
+	padding: 0;
+}
+
+.ans-woocommerce ul.products li.product a img {
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+	background: var(--ans-muted);
+}
+
+.ans-woocommerce .button,
+.ans-woocommerce button.button,
+.ans-woocommerce input.button,
+.ans-woocommerce #respond input#submit {
+	border-radius: 999px;
+	background: var(--ans-ink);
+	color: var(--ans-paper);
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+}
+
+.ans-woocommerce .button:hover,
+.ans-woocommerce button.button:hover,
+.ans-woocommerce input.button:hover,
+.ans-woocommerce #respond input#submit:hover {
+	background: var(--ans-gold);
+	color: var(--ans-charcoal);
+}
+
+/* ── Store notices ("… has been added to your cart", errors, info) ── */
+/* WooCommerce ships these as a full-bleed grey bar with an icon-font glyph
+   absolutely positioned in the padding. On the single product page the
+   wrapper carries no max-width (div.product is the container there), so the
+   stock bar ran edge to edge while the product sat in the 1520px column.
+   Re-boxed as a card on the same content column, in the theme palette.
+   `body ` prefix: woocommerce.css loads after this stylesheet, so its own
+   single-class rules would otherwise win on an equal-specificity override. */
+body .woocommerce-error,
+body .woocommerce-info,
+body .woocommerce-message {
+	box-sizing: border-box;
+	margin: 24px 0 0;
+	padding: 14px 18px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 14px;
+	background: var(--ans-cream);
+	border: 1px solid var(--ans-warm-line);
+	border-left: 3px solid var(--ans-gold);
+	border-radius: 6px;
+	color: var(--ans-charcoal);
+	font-size: 14px;
+	line-height: 1.5;
+	list-style: none;
+}
+
+body .woocommerce-error {
+	border-left-color: var(--ans-error);
+}
+
+/* Cart/checkout/account notices sit inside .ans-woocommerce.ans-wrap, which
+   already supplies the column. On the single product page that wrapper is
+   stripped of its max-width and gutter (div.product is the container there),
+   so the notice has to carry the column itself — matched to div.product's
+   own max-width and padding so the card lines up with the gallery edge. */
+.single-product .woocommerce-error,
+.single-product .woocommerce-info,
+.single-product .woocommerce-message {
+	max-width: var(--ans-container-inner);
+	width: calc(100% - var(--ans-gutter) * 2);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Replace the WooCommerce icon font with our own masked glyph so it sits in
+   the flex row rather than absolutely inside the padding. */
+body .woocommerce-error::before,
+body .woocommerce-info::before,
+body .woocommerce-message::before {
+	content: '';
+	position: static;
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	background: var(--ans-gold);
+	-webkit-mask: var(--ans-check-icon) center / contain no-repeat;
+	mask: var(--ans-check-icon) center / contain no-repeat;
+}
+
+body .woocommerce-error::before {
+	background: var(--ans-error);
+}
+
+/* An error notice is a <ul>; its items carry the text. */
+body .woocommerce-error li {
+	list-style: none;
+	margin: 0;
+}
+
+/* "View cart" / "Checkout" — WooCommerce floats these right; in the flex row
+   an auto margin does the same job without escaping the box. Styled to match
+   the outlined Add to Cart button rather than the pill used elsewhere. */
+body .woocommerce-error a.button,
+body .woocommerce-info a.button,
+body .woocommerce-message a.button {
+	float: none;
+	order: 2;
+	margin-left: auto;
+	padding: 8px 18px;
+	min-height: 0;
+	background: transparent;
+	border: 1px solid var(--ans-charcoal);
+	border-radius: 6px;
+	color: var(--ans-charcoal);
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .04em;
+	text-transform: none;
+	text-decoration: none;
+	transition: background .2s ease, color .2s ease;
+}
+
+body .woocommerce-error a.button:hover,
+body .woocommerce-info a.button:hover,
+body .woocommerce-message a.button:hover {
+	background: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+@media (max-width: 900px) {
+	.single-product .woocommerce-error,
+	.single-product .woocommerce-info,
+	.single-product .woocommerce-message {
+		width: 92%;
+	}
+}
+
+@media (max-width: 600px) {
+	/* Below the button's own width there is nothing left for the message, so
+	   let it take the full row instead of squeezing the text to one word. */
+	body .woocommerce-error a.button,
+	body .woocommerce-info a.button,
+	body .woocommerce-message a.button {
+		margin-left: 0;
+		width: 100%;
+		text-align: center;
+	}
+}
+
+/* ==========================================================================
+   Single product page — Tabaya-style layout
+   ========================================================================== */
+
+.ans-visually-hidden {
+	display: none !important;
+}
+
+/* div.product is itself the page container here, so the generic
+   .ans-wrap/.ans-woocommerce shell must not apply a second max-width and
+   gutter — that nesting is what pushed the product content inside the
+   header and footer edges. Cart/checkout/account still use the shell. */
+.single-product .ans-woocommerce.ans-wrap {
+	max-width: none;
+	padding: 0;
+}
+
+.single-product div.product {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 64px;
+	align-items: start;
+	max-width: var(--ans-container);
+	margin: 0 auto;
+	padding: 56px var(--ans-gutter) var(--ans-section);
+}
+
+/* woocommerce-layout.css floats these two columns at width:48% (legacy
+   float layout). Inside our grid that shrinks each one to 48% of its
+   already-half-width column, so both must be reset back to full width. */
+.single-product div.product .woocommerce-product-gallery,
+.single-product div.product .summary {
+	width: 100% !important;
+	float: none !important;
+	margin-bottom: 0 !important;
+}
+
+/* ── Gallery ── */
+.single-product .woocommerce-product-gallery {
+	position: relative;
+}
+
+.single-product .woocommerce-product-gallery__wrapper {
+	background: var(--ans-cream);
+	border: 1px solid var(--ans-warm-line);
+}
+
+.single-product .woocommerce-product-gallery__image img {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+	display: block;
+}
+
+.single-product .woocommerce-product-gallery__trigger {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	z-index: 5;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--ans-cream);
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 50%;
+	font-size: 14px;
+	opacity: .9;
+}
+
+.single-product .onsale {
+	/* !important: WC's .onsale rule hardcodes an olive background. */
+	background-color: var(--ans-charcoal) !important;
+	color: var(--ans-cream) !important;
+	font-family: var(--ans-sans);
+	font-weight: 700 !important;
+	text-transform: uppercase;
+	font-size: 11px !important;
+	letter-spacing: .04em;
+	min-height: 2.6em !important;
+	min-width: 2.6em !important;
+	line-height: 2.6 !important;
+}
+
+/* !important throughout: woocommerce.css targets these as
+   `div.product div.images .flex-control-thumbs li`, which out-specifies
+   any reasonable theme selector and would otherwise force the thumbs to
+   float at width:25% — stretching them into wide, badly-cropped strips. */
+.single-product .flex-control-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 14px 0 0 !important;
+	padding: 0;
+	list-style: none;
+	overflow: visible !important;
+}
+
+.single-product .flex-control-nav li {
+	width: 72px !important;
+	height: 72px;
+	float: none !important;
+	margin: 0 !important;
+}
+
+.single-product .flex-control-nav img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border: 1px solid var(--ans-warm-line);
+	cursor: pointer;
+	opacity: .7;
+	transition: all .2s ease;
+}
+
+.single-product .flex-control-nav img.flex-active,
+.single-product .flex-control-nav img:hover {
+	opacity: 1;
+	border-color: var(--ans-gold);
+}
+
+/* ── Summary column ── */
+.single-product .summary {
+	display: flex;
+	flex-direction: column;
+	padding-top: 8px;
+}
+
+.ans-product-tagline {
+	font-family: var(--ans-serif);
+	font-size: 15px;
+	color: var(--ans-muted);
+	margin: 0 0 10px;
+	font-style: normal;
+}
+
+.single-product .product_title {
+	font-family: var(--ans-serif);
+	font-size: clamp(28px, 3vw, 38px);
+	font-weight: 500;
+	line-height: 1.25;
+	letter-spacing: -.01em;
+	margin: 0 0 16px;
+	max-width: 480px;
+}
+
+.single-product .summary .price {
+	font-family: var(--ans-sans);
+	/* !important: WC's div.product .price rule hardcodes an olive color
+	   with div/p/span type selectors that out-specify a class override. */
+	font-size: 20px !important;
+	font-weight: 600;
+	color: var(--ans-charcoal) !important;
+	margin: 0 0 28px;
+}
+
+.single-product .summary .price del {
+	opacity: .5;
+	font-size: 15px;
+	font-weight: 400;
+	margin-right: 8px;
+	color: inherit;
+}
+
+.single-product .summary .price ins {
+	text-decoration: none;
+	color: inherit;
+}
+
+/* Variation table -> plain block layout */
+.single-product .variations,
+.single-product .variations tbody,
+.single-product .variations tr,
+.single-product .variations th,
+.single-product .variations td {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	text-align: left;
+}
+
+.single-product .variations {
+	margin: 0 0 8px;
+}
+
+.single-product .variations tr {
+	margin-bottom: 24px;
+}
+
+.single-product .variations th.label {
+	font-family: var(--ans-sans);
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--ans-charcoal);
+	text-transform: none;
+	letter-spacing: 0;
+	margin-bottom: 12px;
+}
+
+/* "Size" reads as an instruction next to the pills, but the same attribute
+   label is reused in the Additional Information table where "Select Size"
+   would be wrong — so the verb is added presentationally, here only. */
+.single-product .variations th.label label::before {
+	content: 'Select ';
+}
+
+.single-product .variations td.value {
+	line-height: 0;
+}
+
+.ans-variation-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.ans-variation-pill {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 46px;
+	height: 42px;
+	padding: 0 10px;
+	border-radius: 6px;
+	border: 1px solid var(--ans-warm-line);
+	background: transparent;
+	color: var(--ans-charcoal);
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .02em;
+	/* Not uppercased: size codes are already stored uppercase, and forcing it
+	   here would render colour names like "Coffee" as "COFFEE". */
+	text-transform: none;
+	cursor: pointer;
+	transition: all .2s ease;
+}
+
+.ans-variation-pill:hover {
+	border-color: var(--ans-charcoal);
+}
+
+.ans-variation-pill.is-active {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+/* Unavailable sizes stay readable but are struck through corner-to-corner,
+   which reads as "sold out" more clearly than a dimmed pill alone. */
+.ans-variation-pill.is-disabled {
+	color: var(--ans-faint);
+	border-color: var(--ans-warm-line);
+	cursor: not-allowed;
+	overflow: hidden;
+}
+
+.ans-variation-pill.is-disabled::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		to top right,
+		transparent calc(50% - .5px),
+		var(--ans-warm-line) calc(50% - .5px),
+		var(--ans-warm-line) calc(50% + .5px),
+		transparent calc(50% + .5px)
+	);
+}
+
+/* WooCommerce hides this link with visibility:hidden, which still reserves
+   its space and left a dead gap above the buttons. Drive it from the
+   selection class our pill script sets instead, so it takes no room until
+   there is actually something to clear. */
+.single-product .reset_variations {
+	display: none;
+	margin-top: 10px;
+	font-size: 11px;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: var(--ans-muted);
+	border-bottom: 1px solid var(--ans-warm-line);
+}
+
+.single-product .variations_form.ans-has-variation-selection .reset_variations {
+	display: inline-block;
+	visibility: visible !important;
+}
+
+.single-product .woocommerce-variation-price .price {
+	font-size: 18px;
+	margin: 4px 0 0;
+}
+
+.single-product .woocommerce-variation-availability {
+	margin: 6px 0 0;
+}
+
+/* WooCommerce always renders this panel, even with nothing to show —
+   collapse it when empty so it doesn't leave a gap above the buttons. */
+.single-product .woocommerce-variation.single_variation:empty {
+	display: none;
+}
+
+/* ── Quantity + the four buy buttons ── */
+/* On a variable product the qty + buttons live inside
+   .woocommerce-variation-add-to-cart, not directly in the form (the form
+   also holds the attribute table), so the button row is laid out on
+   whichever element actually holds them. */
+/* Two buttons per row: Add to Cart + Buy Now, then WhatsApp + Call. The
+   quantity stepper spans the full width above them so the pairs stay even.
+   .ans-buy-actions is the standalone grid used when a product has no
+   add-to-cart form (out of stock, external) — see inc/single-product.php. */
+.single-product form.cart:not(.variations_form),
+.single-product .woocommerce-variation-add-to-cart,
+.single-product .ans-buy-actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+	align-items: stretch;
+}
+
+.single-product .ans-buy-actions {
+	margin-top: 16px;
+}
+
+.single-product form.cart {
+	margin-top: 8px;
+}
+
+.single-product form.variations_form.cart {
+	display: block;
+}
+
+/* Quantity is presented as a −/+ stepper; the border lives on the wrapper so
+   the three controls read as one control. */
+.single-product .quantity {
+	grid-column: 1 / -1;
+	justify-self: start;
+	display: flex;
+	align-items: stretch;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 6px;
+	overflow: hidden;
+	min-height: 48px;
+}
+
+.single-product .quantity .qty {
+	width: 46px;
+	min-height: 46px;
+	border: 0;
+	border-radius: 0;
+	text-align: center;
+	font-family: inherit;
+	font-size: 14px;
+	color: var(--ans-charcoal);
+	background: transparent;
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+.single-product .quantity .qty::-webkit-outer-spin-button,
+.single-product .quantity .qty::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.ans-qty-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	border: 0;
+	background: transparent;
+	color: var(--ans-charcoal);
+	font-family: inherit;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background .2s ease;
+}
+
+.ans-qty-btn:hover {
+	background: var(--ans-cream);
+}
+
+/* ── The four buy buttons ── */
+/* Same box, same height, same type scale; only the fill separates them, so
+   the 2×2 grid reads as one control rather than four borrowed styles. */
+.single-product .single_add_to_cart_button.button,
+.ans-buy-btn {
+	min-width: 0;
+	min-height: 52px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	border-radius: 6px;
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: .04em;
+	line-height: 1.2;
+	text-transform: none;
+	text-align: center;
+	text-decoration: none;
+	padding: 12px 16px;
+	cursor: pointer;
+	transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+/* Add to Cart — outlined, the quieter of the two commerce actions.
+   !important: WooCommerce's own .button.alt rule hardcodes a purple
+   background with a bare `button` type selector, which out-specifies
+   a class-only override — see woocommerce.css .button.alt. */
+.single-product .single_add_to_cart_button.button {
+	background: transparent !important;
+	border: 1px solid var(--ans-charcoal) !important;
+	color: var(--ans-charcoal) !important;
+	text-shadow: none !important;
+}
+
+/* Cart glyph, drawn with a mask so it inherits the button's text colour
+   on both the default and hover states. */
+.single-product .single_add_to_cart_button.button::before {
+	content: '';
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	background: currentColor;
+	-webkit-mask: var(--ans-cart-icon) center / contain no-repeat;
+	mask: var(--ans-cart-icon) center / contain no-repeat;
+}
+
+.single-product .single_add_to_cart_button.button:hover {
+	background: var(--ans-charcoal) !important;
+	color: var(--ans-cream) !important;
+}
+
+.single-product .single_add_to_cart_button.button.disabled,
+.ans-buy-btn.disabled {
+	opacity: .4;
+	cursor: not-allowed;
+}
+
+/* Buy Now — the one filled button, so the primary action separates from the
+   outlined Add to cart and the dark header. Warm gold rather than charcoal:
+   charcoal-on-gold-soft is ~6.9:1, comfortably past AA, where charcoal on
+   the deeper --ans-gold would fall just under it. */
+.ans-buy-btn--now {
+	background: var(--ans-gold-soft);
+	border: 1px solid var(--ans-gold-soft);
+	color: var(--ans-charcoal);
+}
+
+.ans-buy-btn--now:hover {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+/* WhatsApp + Call — the contact routes. Cream on the warm rule keeps them
+   subordinate to the two commerce buttons while staying on palette; only
+   the glyph carries a distinguishing colour. */
+.ans-buy-btn--whatsapp,
+.ans-buy-btn--call {
+	background: var(--ans-cream);
+	border: 1px solid var(--ans-warm-line);
+	color: var(--ans-charcoal);
+}
+
+.ans-buy-btn--whatsapp:hover,
+.ans-buy-btn--call:hover {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+.ans-buy-btn__icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	background: currentColor;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+
+.ans-buy-btn__icon--bolt {
+	-webkit-mask-image: var(--ans-bolt-icon);
+	mask-image: var(--ans-bolt-icon);
+}
+
+.ans-buy-btn__icon--whatsapp {
+	background: #1da851;
+	-webkit-mask-image: var(--ans-whatsapp-icon);
+	mask-image: var(--ans-whatsapp-icon);
+}
+
+.ans-buy-btn__icon--phone {
+	background: var(--ans-gold);
+	-webkit-mask-image: var(--ans-phone-icon);
+	mask-image: var(--ans-phone-icon);
+}
+
+/* On the dark hover fill the brand-coloured glyphs lose contrast, so hand
+   them back to the button's own text colour. */
+.ans-buy-btn--whatsapp:hover .ans-buy-btn__icon,
+.ans-buy-btn--call:hover .ans-buy-btn__icon {
+	background: currentColor;
+}
+
+/* ── Reassurance row under the buy buttons ── */
+.ans-trust-points {
+	list-style: none;
+	margin: 22px 0 0;
+	padding: 16px 0 0;
+	border-top: 1px solid var(--ans-warm-line);
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.ans-trust-points__item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+	color: var(--ans-ink-soft);
+}
+
+.ans-trust-points__icon {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	background: var(--ans-gold);
+	-webkit-mask: var(--ans-check-icon) center / contain no-repeat;
+	mask: var(--ans-check-icon) center / contain no-repeat;
+}
+
+.single-product .product_meta {
+	margin-top: 24px;
+	font-size: 12px;
+	color: var(--ans-muted);
+	letter-spacing: .04em;
+}
+
+.single-product .product_meta > span {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.single-product .product_meta a {
+	color: var(--ans-muted);
+}
+
+/* ── Description / details accordion ── */
+/* Rendered inside .summary (see inc/single-product.php) so it follows the
+   buy buttons directly rather than starting a new grid row beneath the
+   taller gallery. */
+.ans-product-tabs {
+	margin: 26px 0 0;
+	border-top: 1px solid var(--ans-warm-line);
+	padding-top: 4px;
+}
+
+/* The panels reuse the archive filter accordion markup, but here they read
+   better with a +/× indicator than the sidebar's chevron. Scoped to the
+   product tabs so the archive filters keep their own affordance. */
+.ans-product-tabs .ans-chevron {
+	display: none;
+}
+
+.ans-product-tabs .ans-filter-group__toggle::after {
+	content: '+';
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 1;
+	color: var(--ans-charcoal);
+	transition: transform .25s ease;
+}
+
+.ans-product-tabs .ans-filter-group__toggle[aria-expanded="true"]::after {
+	transform: rotate(45deg);
+}
+
+.ans-product-tabs .ans-filter-group__toggle {
+	font-size: 16px;
+	font-weight: 600;
+	padding: 18px 0;
+}
+
+.ans-product-tabs .ans-filter-group__body {
+	font-size: 14px;
+	line-height: 1.75;
+	color: var(--ans-ink-soft);
+	padding-bottom: 22px;
+}
+
+/* ── "You may also like" / up-sells ── */
+/* These render after the summary, so inside div.product's two-column grid
+   they land in the left column and squeeze the cards to a fraction of
+   their width. Span the full grid instead. */
+.single-product .related.products,
+.single-product .up-sells.products {
+	grid-column: 1 / -1;
+	margin-top: 72px;
+	padding-top: 56px;
+	border-top: 1px solid var(--ans-warm-line);
+}
+
+.single-product .related.products > h2,
+.single-product .up-sells.products > h2 {
+	font-family: var(--ans-serif);
+	font-size: clamp(22px, 2.2vw, 30px);
+	font-weight: 500;
+	letter-spacing: -.01em;
+	text-align: left;
+	margin: 0 0 28px;
+}
+
+.single-product .related.products ul.products,
+.single-product .up-sells.products ul.products {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: var(--ans-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (max-width: 1024px) {
+	.single-product .related.products ul.products,
+	.single-product .up-sells.products ul.products {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 760px) {
+	.single-product .related.products,
+	.single-product .up-sells.products {
+		margin-top: 48px;
+		padding-top: 36px;
+	}
+
+	.single-product .related.products ul.products,
+	.single-product .up-sells.products ul.products {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.ans-product-tabs .woocommerce-product-attributes {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 14px;
+}
+
+.ans-product-tabs .woocommerce-product-attributes th,
+.ans-product-tabs .woocommerce-product-attributes td {
+	text-align: left;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--ans-warm-line);
+}
+
+.ans-product-tabs .woocommerce-product-attributes th {
+	width: 40%;
+	color: var(--ans-muted);
+	font-weight: 600;
+}
+
+@media (max-width: 900px) {
+	.single-product div.product {
+		grid-template-columns: 1fr;
+		gap: 32px;
+		padding: 32px 4% var(--ans-section);
+	}
+
+	.single-product .product_title {
+		max-width: none;
+	}
+
+	.single-product .quantity .qty {
+		width: 84px;
+	}
+
+	/* The 2×2 button grid holds on tablet — the pairs stay readable down to
+	   roughly a 320px column; below that the labels start wrapping to three
+	   lines, so they stack instead (see the 460px block). */
+	.single-product .single_add_to_cart_button.button,
+	.ans-buy-btn {
+		font-size: 12px;
+		padding: 12px 12px;
+		gap: 8px;
+	}
+
+	.ans-product-tabs {
+		max-width: none;
+	}
+
+	/* Flexslider computes slide widths as (slide-count * container-width)
+	   using a transform to pan between them; at narrow widths this has
+	   produced a gallery that overflows or renders blank. Neutralize the
+	   transform/width math and fall back to simple class-toggled display —
+	   thumbnail clicks still swap the active slide via flexslider's own
+	   class toggling, just without the slide animation. */
+	.single-product .flex-viewport {
+		height: auto !important;
+		overflow: visible !important;
+	}
+
+	.single-product .woocommerce-product-gallery__wrapper {
+		width: 100% !important;
+		transform: none !important;
+		display: block !important;
+	}
+
+	.single-product .woocommerce-product-gallery__image {
+		display: none !important;
+		width: 100% !important;
+		float: none !important;
+		margin: 0 !important;
+	}
+
+	.single-product .woocommerce-product-gallery__image.flex-active-slide {
+		display: block !important;
+	}
+}
+
+@media (max-width: 460px) {
+	.single-product form.cart:not(.variations_form),
+	.single-product .woocommerce-variation-add-to-cart,
+	.single-product .ans-buy-actions {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* WordPress core alignment classes */
+.alignleft {
+	float: left;
+	margin: 6px 24px 24px 0;
+}
+
+.alignright {
+	float: right;
+	margin: 6px 0 24px 24px;
+}
+
+.aligncenter {
+	margin: 24px auto;
+	display: block;
+}
+
+.alignwide,
+.alignfull {
+	max-width: 100%;
+}
+
+.wp-caption-text,
+.gallery-caption {
+	font-size: 13px;
+	color: var(--ans-faint);
+}
+
+.sticky .ans-post-card h2::after {
+	content: ' \2605';
+}
+
+.bypostauthor > .comment-body {
+	background: transparent;
+}
+
+/* ==========================================================================
+   15. Animations
+   ========================================================================== */
+
+@keyframes ansMarquee {
+	from { transform: translateX(0); }
+	to   { transform: translateX(-50%); }
+}
+
+@keyframes ansFadeUp {
+	from { opacity: 0; transform: translateY(24px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+.ans-reveal {
+	opacity: 0;
+	transform: translateY(24px);
+	transition: opacity .7s ease, transform .7s ease;
+}
+
+.ans-reveal.is-visible {
+	opacity: 1;
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ans-reveal,
+	.ans-hero__text {
+		opacity: 1;
+		transform: none;
+		animation: none;
+		transition: none;
+	}
+}
+
+/* ==========================================================================
+   16. Responsive
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+	:root {
+		--ans-gutter: 36px;
+		--ans-section: 76px;
+		--ans-gap: 22px;
+	}
+
+	.ans-hero__text,
+	.ans-editorial__text,
+	.ans-single-product__info {
+		padding: 64px 44px;
+	}
+
+	.ans-hero__title {
+		font-size: 60px;
+	}
+
+	.ans-editorial__text h2 {
+		font-size: 44px;
+	}
+
+	.ans-nav ul {
+		gap: 22px;
+	}
+}
+
+@media (max-width: 1024px) {
+	.ans-grid-4 {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.ans-lookbook__grid {
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto;
+	}
+
+	.ans-look:nth-child(1),
+	.ans-look:nth-child(2),
+	.ans-look:nth-child(3) {
+		grid-column: auto;
+		grid-row: auto;
+		min-height: 320px;
+	}
+
+	.ans-lookbook__note {
+		grid-column: auto;
+		grid-row: auto;
+	}
+}
+
+@media (max-width: 900px) {
+	.ans-nav-toggle {
+		display: block;
+	}
+
+	.ans-header__bar {
+		grid-template-columns: auto 1fr auto;
+		gap: 14px;
+		min-height: 74px;
+	}
+
+	.ans-branding {
+		order: 1;
+	}
+
+	.ans-header__actions {
+		order: 3;
+		gap: 8px;
+	}
+
+	.ans-branding img,
+	.ans-branding .custom-logo {
+		height: 36px;
+		max-width: 160px;
+	}
+
+	.ans-icon-btn {
+		width: 42px;
+		height: 42px;
+		font-size: 18px;
+	}
+
+	.ans-nav {
+		display: none;
+		order: 4;
+		grid-column: 1 / -1;
+		min-height: auto;
+		overflow: visible;
+		padding: 18px var(--ans-gutter);
+	}
+
+	.ans-nav.is-open {
+		display: block;
+	}
+
+	.ans-nav ul {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 18px;
+	}
+
+	.ans-nav ul ul {
+		position: static;
+		display: flex;
+		border: 0;
+		padding: 8px 0 0 14px;
+	}
+
+	.ans-editorial,
+	.ans-single-product {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-hero {
+		min-height: clamp(300px, 62vw, 520px);
+	}
+
+	.ans-editorial__media {
+		order: -1;
+		min-height: 420px;
+	}
+
+	.ans-hero__title {
+		font-size: 46px;
+	}
+
+	.ans-section-head h2 {
+		font-size: 30px;
+	}
+
+	.ans-promises {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-promise {
+		border-right: 0;
+		border-bottom: 1px solid var(--ans-warm-line);
+		padding: 40px 0;
+		margin: 0 var(--ans-gutter);
+	}
+
+	.ans-about blockquote {
+		font-size: 26px;
+	}
+
+	.ans-prefooter__features,
+	.ans-footer__main {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-prefooter-card--large {
+		min-height: 240px;
+	}
+
+	.ans-footer-widgets {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-gallery {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 640px) {
+	:root {
+		--ans-gutter: 20px;
+		--ans-section: 56px;
+		--ans-gap: 16px;
+	}
+
+	.ans-grid-4,
+	.ans-grid-3,
+	.ans-woocommerce ul.products {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.ans-lookbook__grid {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-hero__text,
+	.ans-editorial__text,
+	.ans-single-product__info {
+		padding: 48px 20px;
+	}
+
+	.ans-hero__title {
+		font-size: 38px;
+	}
+
+	.ans-editorial__text h2 {
+		font-size: 32px;
+	}
+
+	.ans-page-header h1 {
+		font-size: 34px;
+	}
+
+	.ans-prefooter {
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.ans-prefooter__features,
+	.ans-prefooter__shop h2 {
+		padding-left: var(--ans-gutter);
+		padding-right: var(--ans-gutter);
+	}
+
+	.ans-prefooter__features {
+		gap: 14px;
+	}
+
+	.ans-prefooter__grid {
+		grid-template-columns: repeat(3, 78vw);
+		gap: 14px;
+		padding-left: var(--ans-gutter);
+		padding-right: var(--ans-gutter);
+	}
+
+	.ans-newsletter__form {
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.ans-newsletter__form button {
+		min-height: 48px;
+	}
+
+	.ans-footer,
+	.ans-footer__bottom {
+		justify-content: center;
+		text-align: center;
+	}
+
+	.ans-footer__brand {
+		margin: 0 auto;
+	}
+
+	.ans-footer__bottom {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.ans-404 h1 {
+		font-size: 64px;
+	}
+
+	/* Archive mobile */
+	.ans-archive-shell {
+		grid-template-columns: 1fr;
+		padding-left: 4%;
+		padding-right: 4%;
+	}
+
+	.ans-filter-sidebar {
+		display: none;
+		position: static;
+	}
+
+	.ans-filter-sidebar.is-open {
+		display: block;
+	}
+
+	.ans-filter-mobile-toggle {
+		display: inline-flex;
+	}
+
+	.ans-archive-products ul.products {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+}
+
+/* Tablet: 2-col sidebar + keep 4% padding */
+@media (max-width: 1024px) {
+	.ans-archive-shell {
+		grid-template-columns: 220px 1fr;
+		gap: 32px;
+		padding-left: 4%;
+		padding-right: 4%;
+	}
+
+	.ans-archive-header {
+		padding-left: 4%;
+		padding-right: 4%;
+	}
+
+	.ans-archive-products ul.products {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.ans-archive-products[data-cols="4"] ul.products {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.ans-pcard__info {
+		padding: 14px 0 0;
+	}
+
+	.ans-pcard__name {
+		font-size: 13px;
+	}
+
+	.ans-pcard__price {
+		font-size: 12px;
+	}
+
+	.ans-pcard__atc {
+		font-size: 10px;
+		padding: 10px 14px;
+	}
+}
+
+@media (max-width: 900px) {
+	.ans-nav-toggle {
+		display: block;
+	}
+
+	.ans-header__bar {
+		grid-template-columns: auto 1fr auto;
+		gap: 14px;
+		min-height: 74px;
+	}
+
+	.ans-branding {
+		order: 1;
+	}
+
+	.ans-header__actions {
+		order: 3;
+		gap: 8px;
+	}
+
+	.ans-branding img,
+	.ans-branding .custom-logo {
+		height: 36px;
+		max-width: 160px;
+	}
+
+	.ans-icon-btn {
+		width: 42px;
+		height: 42px;
+		font-size: 18px;
+	}
+
+	.ans-nav {
+		display: none;
+		order: 4;
+		grid-column: 1 / -1;
+		min-height: auto;
+		overflow: visible;
+		padding: 18px var(--ans-gutter);
+	}
+
+	.ans-nav.is-open {
+		display: block;
+	}
+
+	.ans-nav ul {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 18px;
+	}
+
+	.ans-nav ul ul {
+		position: static;
+		display: flex;
+		border: 0;
+		padding: 8px 0 0 14px;
+	}
+
+	.ans-editorial,
+	.ans-single-product {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-hero {
+		min-height: clamp(300px, 62vw, 520px);
+	}
+
+	.ans-editorial__media {
+		order: -1;
+		min-height: 420px;
+	}
+
+	.ans-hero__title {
+		font-size: 46px;
+	}
+
+	.ans-section-head h2 {
+		font-size: 30px;
+	}
+
+	.ans-promises {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-promise {
+		border-right: 0;
+		border-bottom: 1px solid var(--ans-warm-line);
+		padding: 40px 0;
+		margin: 0 var(--ans-gutter);
+	}
+
+	.ans-about blockquote {
+		font-size: 26px;
+	}
+
+	.ans-prefooter__features,
+	.ans-footer__main {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-prefooter-card--large {
+		min-height: 240px;
+	}
+
+	.ans-footer-widgets {
+		grid-template-columns: 1fr;
+	}
+
+	.ans-gallery {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+/* ==========================================================================
+   Cart drawer
+   ========================================================================== */
+
+.ans-cart-drawer {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.ans-cart-drawer.is-open {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.ans-cart-drawer__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(20, 15, 12, .5);
+	opacity: 0;
+	transition: opacity .3s ease;
+}
+
+.ans-cart-drawer.is-open .ans-cart-drawer__overlay {
+	opacity: 1;
+}
+
+.ans-cart-drawer__panel {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: min(420px, 100%);
+	display: flex;
+	flex-direction: column;
+	background: var(--ans-paper);
+	box-shadow: -18px 0 48px rgba(20, 15, 12, .16);
+	transform: translateX(100%);
+	transition: transform .34s cubic-bezier(.22, .61, .36, 1);
+}
+
+.ans-cart-drawer.is-open .ans-cart-drawer__panel {
+	transform: translateX(0);
+}
+
+/* Keep the panel clear of the WordPress admin bar for logged-in users. */
+.admin-bar .ans-cart-drawer__panel {
+	top: 32px;
+	height: calc(100% - 32px);
+}
+
+body.ans-cart-open {
+	overflow: hidden;
+}
+
+/* ── Head ── */
+.ans-cart-drawer__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 26px 26px 18px;
+}
+
+.ans-cart-drawer__eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: .2em;
+	text-transform: uppercase;
+	color: var(--ans-muted);
+}
+
+.ans-cart-drawer__badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 22px;
+	height: 22px;
+	padding: 0 6px;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 999px;
+	font-size: 11px;
+	letter-spacing: 0;
+	color: var(--ans-charcoal);
+}
+
+.ans-cart-drawer__heading h2 {
+	font-family: var(--ans-serif);
+	font-size: 30px;
+	font-weight: 500;
+	letter-spacing: -.01em;
+	margin: 8px 0 0;
+}
+
+.ans-cart-drawer__close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 50%;
+	background: var(--ans-cream);
+	color: var(--ans-charcoal);
+	font-size: 22px;
+	line-height: 1;
+	cursor: pointer;
+	transition: all .2s ease;
+}
+
+.ans-cart-drawer__close:hover {
+	background: var(--ans-charcoal);
+	border-color: var(--ans-charcoal);
+	color: var(--ans-cream);
+}
+
+/* ── Body ── */
+.ans-cart-drawer__body {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.ans-cart-drawer__inner {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 26px 20px;
+}
+
+.ans-cart-drawer__items {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.ans-cart-line {
+	display: flex;
+	gap: 14px;
+	padding: 14px;
+	background: var(--ans-cream);
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 10px;
+}
+
+.ans-cart-line__media {
+	width: 64px;
+	flex-shrink: 0;
+}
+
+.ans-cart-line__media img {
+	width: 100%;
+	height: 78px;
+	object-fit: cover;
+	border-radius: 6px;
+	display: block;
+}
+
+.ans-cart-line__body {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.ans-cart-line__name {
+	font-family: var(--ans-sans);
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	margin: 0;
+	/* One line with an ellipsis, so a long product name cannot push the
+	   quantity controls out of the panel. */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ans-cart-line__name a {
+	color: var(--ans-charcoal);
+}
+
+.ans-cart-line__meta,
+.ans-cart-line__meta p {
+	font-size: 12px;
+	color: var(--ans-muted);
+	margin: 0;
+}
+
+.ans-cart-line__price {
+	font-size: 13px;
+	color: var(--ans-gold);
+	font-weight: 500;
+}
+
+.ans-cart-line__controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.ans-cart-qty {
+	display: inline-flex;
+	align-items: stretch;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 999px;
+	background: var(--ans-paper);
+	overflow: hidden;
+}
+
+.ans-cart-qty__btn {
+	width: 30px;
+	border: 0;
+	background: transparent;
+	color: var(--ans-charcoal);
+	font-family: inherit;
+	font-size: 15px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background .2s ease;
+}
+
+.ans-cart-qty__btn:hover {
+	background: var(--ans-warm-line);
+}
+
+.ans-cart-qty__input {
+	width: 34px;
+	height: 32px;
+	border: 0;
+	background: transparent;
+	text-align: center;
+	font-family: inherit;
+	font-size: 13px;
+	color: var(--ans-charcoal);
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+.ans-cart-qty__input::-webkit-outer-spin-button,
+.ans-cart-qty__input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.ans-cart-line__remove,
+.ans-co-line__remove {
+	border: 0;
+	background: none;
+	padding: 0;
+	font-family: inherit;
+	font-size: 12px;
+	color: var(--ans-muted);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+	transition: color .2s ease;
+}
+
+.ans-cart-line__remove:hover,
+.ans-co-line__remove:hover {
+	color: var(--ans-charcoal);
+}
+
+.ans-co-line__remove {
+	align-self: flex-start;
+	margin-top: 2px;
+}
+
+/* ── Empty state ── */
+.ans-cart-drawer__empty {
+	padding: 48px 0;
+	text-align: center;
+	color: var(--ans-muted);
+}
+
+.ans-cart-drawer__continue {
+	display: inline-block;
+	margin-top: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--ans-charcoal);
+	border-bottom: 1px solid var(--ans-gold-soft);
+	padding-bottom: 3px;
+}
+
+/* ── Footer ── */
+.ans-cart-drawer__footer {
+	border-top: 1px solid var(--ans-warm-line);
+	background: var(--ans-cream);
+	padding: 20px 26px calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+.ans-cart-drawer__footer.is-hidden {
+	display: none;
+}
+
+.ans-cart-drawer__total {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	font-size: 15px;
+	color: var(--ans-charcoal);
+}
+
+.ans-cart-drawer__total strong {
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--ans-gold);
+}
+
+.ans-cart-drawer__note {
+	margin: 6px 0 16px;
+	font-size: 12px;
+	color: var(--ans-muted);
+}
+
+.ans-cart-drawer__checkout {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 54px;
+	border-radius: 6px;
+	background: var(--ans-charcoal);
+	color: var(--ans-cream);
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: .02em;
+	transition: background .2s ease, color .2s ease;
+}
+
+.ans-cart-drawer__checkout:hover {
+	background: var(--ans-gold-soft);
+	color: var(--ans-charcoal);
+}
+
+.ans-cart-drawer__checkout-icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	background: currentColor;
+	-webkit-mask: var(--ans-cart-icon) center / contain no-repeat;
+	mask: var(--ans-cart-icon) center / contain no-repeat;
+}
+
+/* ── Busy state while an update is in flight ── */
+.ans-cart-drawer.is-busy .ans-cart-drawer__inner {
+	opacity: .5;
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ans-cart-drawer__panel,
+	.ans-cart-drawer__overlay {
+		transition: none;
+	}
+}
+
+/* ==========================================================================
+   Cash-on-delivery checkout modal
+   ========================================================================== */
+
+.ans-cod {
+	position: fixed;
+	inset: 0;
+	z-index: 210;
+	visibility: hidden;
+	pointer-events: none;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	padding: 24px;
+}
+
+.ans-cod.is-open {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.ans-cod__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(20, 15, 12, .5);
+	opacity: 0;
+	transition: opacity .25s ease;
+}
+
+.ans-cod.is-open .ans-cod__overlay {
+	opacity: 1;
+}
+
+.ans-cod__dialog {
+	position: relative;
+	width: min(420px, 100%);
+	max-height: calc(100vh - 48px);
+	display: flex;
+	flex-direction: column;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 24px 70px rgba(20, 15, 12, .28);
+	overflow: hidden;
+	transform: translateY(-12px);
+	opacity: 0;
+	transition: transform .25s ease, opacity .25s ease;
+}
+
+.ans-cod.is-open .ans-cod__dialog {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+.admin-bar .ans-cod {
+	padding-top: 56px;
+}
+
+/* ── Head ── */
+.ans-cod__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 18px;
+	border-bottom: 1px solid var(--ans-warm-line);
+}
+
+.ans-cod__head h2 {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-family: var(--ans-sans);
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod__head-icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	background: currentColor;
+	-webkit-mask: var(--ans-home-icon) center / contain no-repeat;
+	mask: var(--ans-home-icon) center / contain no-repeat;
+}
+
+.ans-cod__close {
+	width: 30px;
+	height: 30px;
+	border: 0;
+	background: none;
+	font-size: 22px;
+	line-height: 1;
+	color: var(--ans-charcoal);
+	cursor: pointer;
+	border-radius: 50%;
+	transition: background .2s ease;
+}
+
+.ans-cod__close:hover {
+	background: var(--ans-cream);
+}
+
+/* ── Form ── */
+.ans-cod__form {
+	padding: 16px 18px 20px;
+	overflow-y: auto;
+}
+
+.ans-cod__intro {
+	margin: 0 0 16px;
+	text-align: center;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod__error {
+	display: none;
+	margin-bottom: 12px;
+	padding: 10px 12px;
+	border-radius: 6px;
+	background: #fdecec;
+	border: 1px solid #f2c4c4;
+	color: #9b2c2c;
+	font-size: 13px;
+}
+
+.ans-cod__error.is-visible {
+	display: block;
+}
+
+.ans-cod__field {
+	margin-bottom: 12px;
+}
+
+.ans-cod__field label {
+	display: block;
+	margin-bottom: 5px;
+	font-size: 12px;
+	color: var(--ans-ink-soft);
+}
+
+.ans-cod__field abbr {
+	color: #c0392b;
+	text-decoration: none;
+}
+
+/* Icon sits inside the field, so the input keeps the full clickable width. */
+.ans-cod__input {
+	position: relative;
+	display: block;
+}
+
+.ans-cod__input::before {
+	content: '';
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 16px;
+	height: 16px;
+	background: var(--ans-muted);
+	pointer-events: none;
+}
+
+.ans-cod__input--user::before { -webkit-mask: var(--ans-user-icon) center / contain no-repeat; mask: var(--ans-user-icon) center / contain no-repeat; }
+.ans-cod__input--phone::before { -webkit-mask: var(--ans-phone-icon) center / contain no-repeat; mask: var(--ans-phone-icon) center / contain no-repeat; }
+.ans-cod__input--pin::before { -webkit-mask: var(--ans-pin-icon) center / contain no-repeat; mask: var(--ans-pin-icon) center / contain no-repeat; }
+.ans-cod__input--note::before { -webkit-mask: var(--ans-note-icon) center / contain no-repeat; mask: var(--ans-note-icon) center / contain no-repeat; }
+
+.ans-cod__input input {
+	width: 100%;
+	height: 42px;
+	padding: 0 12px 0 38px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: #ededed;
+	font-family: inherit;
+	font-size: 14px;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod__input input:focus {
+	outline: none;
+	border-color: var(--ans-charcoal);
+	background: #fff;
+}
+
+/* ── Cart lines ── */
+.ans-cod__cart {
+	margin: 14px 0;
+}
+
+.ans-cod__items {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.ans-cod-item {
+	display: flex;
+	gap: 12px;
+	padding: 12px;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 8px;
+	background: #fff;
+}
+
+.ans-cod-item__media {
+	position: relative;
+	width: 52px;
+	flex-shrink: 0;
+}
+
+.ans-cod-item__media img {
+	width: 100%;
+	height: 62px;
+	object-fit: cover;
+	border-radius: 4px;
+	display: block;
+}
+
+.ans-cod-item__count {
+	position: absolute;
+	top: -6px;
+	right: -6px;
+	min-width: 18px;
+	height: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: var(--ans-charcoal);
+	color: #fff;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.ans-cod-item__body {
+	flex: 1;
+	min-width: 0;
+}
+
+.ans-cod-item__name {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod-item__meta,
+.ans-cod-item__meta p {
+	margin: 2px 0 0;
+	font-size: 12px;
+	color: var(--ans-muted);
+}
+
+.ans-cod-item__price {
+	margin-top: 2px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod-qty {
+	margin-top: 8px;
+	display: inline-flex;
+	align-items: stretch;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.ans-cod-qty__btn {
+	width: 28px;
+	border: 0;
+	background: transparent;
+	font-family: inherit;
+	font-size: 15px;
+	line-height: 1;
+	color: var(--ans-charcoal);
+	cursor: pointer;
+}
+
+.ans-cod-qty__btn:hover {
+	background: var(--ans-cream);
+}
+
+.ans-cod-qty__value {
+	min-width: 30px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 13px;
+}
+
+/* ── Shipping ── */
+.ans-cod__legend {
+	display: block;
+	margin-bottom: 8px;
+	font-size: 13px;
+	color: var(--ans-ink-soft);
+}
+
+.ans-cod-ship {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px;
+	margin-bottom: 8px;
+	border: 1px solid var(--ans-warm-line);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: border-color .2s ease;
+}
+
+.ans-cod-ship.is-selected {
+	border-color: var(--ans-charcoal);
+}
+
+.ans-cod-ship input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.ans-cod-ship__dot {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	border: 1px solid var(--ans-muted);
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ans-cod-ship.is-selected .ans-cod-ship__dot {
+	border-color: var(--ans-charcoal);
+}
+
+.ans-cod-ship.is-selected .ans-cod-ship__dot::after {
+	content: '';
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--ans-charcoal);
+}
+
+.ans-cod-ship__label {
+	flex: 1;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod-ship__cost {
+	font-size: 14px;
+	color: var(--ans-ink-soft);
+}
+
+/* ── Totals ── */
+.ans-cod__totals {
+	margin-top: 14px;
+	padding: 14px;
+	border-radius: 8px;
+	background: var(--ans-cream);
+}
+
+.ans-cod__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	font-size: 14px;
+	color: var(--ans-ink-soft);
+	margin-bottom: 6px;
+}
+
+.ans-cod__row--total {
+	margin: 10px 0 0;
+	padding-top: 10px;
+	border-top: 1px solid var(--ans-warm-line);
+	font-size: 17px;
+	font-weight: 700;
+	color: var(--ans-charcoal);
+}
+
+.ans-cod__submit {
+	width: 100%;
+	min-height: 52px;
+	margin-top: 14px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--ans-charcoal);
+	color: var(--ans-cream);
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: background .2s ease, color .2s ease;
+}
+
+.ans-cod__submit:hover:not(:disabled) {
+	background: var(--ans-gold-soft);
+	color: var(--ans-charcoal);
+}
+
+.ans-cod__submit:disabled {
+	opacity: .6;
+	cursor: wait;
+}
+
+.ans-cod.is-busy .ans-cod__cart,
+.ans-cod.is-busy .ans-cod__shipping {
+	opacity: .55;
+	pointer-events: none;
+}
+
+@media (max-width: 560px) {
+	.ans-cod {
+		padding: 12px;
+		align-items: flex-end;
+		justify-content: center;
+	}
+
+	.ans-cod__dialog {
+		width: 100%;
+		max-height: calc(100vh - 24px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ans-cod__dialog,
+	.ans-cod__overlay {
+		transition: none;
+	}
+}
+
+/* ==========================================================================
+   Checkout page — dedicated design system for the form/order-summary area.
+   The normal site header and footer are unchanged on this page — only the
+   content between them is restyled. This whole block is scoped under
+   body.woocommerce-checkout so its own type system (Bricolage
+   Grotesque/Inter, enqueued conditionally in functions.php) and colour
+   tokens never leak into the rest of the site, which keeps Archivo/Playfair
+   Display and the --ans-* tokens.
+
+   The payment method (Cash on Delivery) and the Place Order button stay
+   together in the order-summary card rather than in separate columns:
+   WooCommerce's checkout AJAX (wc-checkout.js) refreshes both as a single
+   atomic ".woocommerce-checkout-payment" fragment on every totals update
+   (including the automatic one that fires right after page load), so
+   splitting them into two DOM locations would have them silently merge back
+   into one on that first refresh.
+   ========================================================================== */
+
+body.woocommerce-checkout {
+	--co-ink: #141311;
+	--co-paper: #F6F4EE;
+	--co-surface: #FFFFFF;
+	--co-line: #E4E0D3;
+	--co-line-strong: #D2CCB8;
+	--co-muted: #8A8676;
+	--co-muted-2: #B7B2A0;
+	--co-string: #C9A227;
+	--co-danger: #B4402C;
+	--co-radius: 2px;
+
+	background: var(--co-paper);
+}
+
+body.woocommerce-checkout main#content,
+body.woocommerce-checkout .ans-content {
+	background: var(--co-paper);
+	font-family: 'Inter', sans-serif;
+	color: var(--co-ink);
+	-webkit-font-smoothing: antialiased;
+}
+
+body.woocommerce-checkout .woocommerce-billing-fields h3,
+body.woocommerce-checkout .ans-checkout__heading,
+body.woocommerce-checkout #order_review_heading,
+body.woocommerce-checkout #place_order {
+	font-family: 'Bricolage Grotesque', sans-serif;
+}
+
+/* ── Page shell ── */
+body.woocommerce-checkout .ans-content {
+	max-width: 1160px;
+	margin: 0 auto;
+	padding: 36px 32px 80px;
+}
+
+body.woocommerce-checkout .woocommerce-notices-wrapper {
+	max-width: 1160px;
+	margin: 0 auto;
+	padding: 24px 32px 0;
+}
+
+.ans-checkout__heading {
+	font-size: 26px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--co-ink);
+	margin: 0 0 28px;
+}
+
+.ans-hidden-field {
+	display: none !important;
+}
+
+.woocommerce-checkout form.checkout > * + * {
+	margin-top: 36px;
+}
+
+/* Two independent-height columns rather than a CSS grid: the left column
+   now stacks two pieces (billing details, then the payment-method preview
+   from woocommerce_checkout_after_customer_details) while the right stacks
+   two different ones (order-review heading, then the order-review card).
+   A grid forces both columns to share row tracks, so the taller side
+   inflates a shared row and leaves dead space in the shorter one — floats
+   let each side flow to its own natural height instead. */
+@media (min-width: 880px) {
+	.woocommerce-checkout form.checkout {
+		display: flow-root;
+	}
+
+	.woocommerce-checkout form.checkout > * + * {
+		margin-top: 0;
+	}
+
+	.woocommerce-checkout form.checkout > #customer_details,
+	.woocommerce-checkout form.checkout > .ans-co-payment-preview {
+		float: left;
+		width: calc(100% - 456px);
+	}
+
+	.woocommerce-checkout form.checkout > #order_review_heading,
+	.woocommerce-checkout form.checkout > #order_review {
+		float: right;
+		width: 400px;
+	}
+}
+
+.woocommerce-checkout .col2-set .col-1,
+.woocommerce-checkout .col2-set .col-2 {
+	float: none;
+	width: 100%;
+	max-width: none;
+	padding: 0;
+}
+
+/* ── Coupon strip ── */
+.woocommerce-checkout .woocommerce-form-coupon-toggle {
+	margin-bottom: 32px;
+}
+
+.woocommerce-checkout .woocommerce-form-coupon-toggle .woocommerce-info {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	background: var(--co-surface);
+	border: 1px solid var(--co-line);
+	border-radius: var(--co-radius);
+	color: var(--co-ink);
+	font-size: 13.5px;
+	padding: 14px 18px;
+	margin: 0;
+}
+
+.woocommerce-checkout .woocommerce-form-coupon-toggle .woocommerce-info::before {
+	display: none;
+}
+
+.woocommerce-checkout .woocommerce-form-coupon-toggle a.showcoupon {
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	color: var(--co-ink);
+	white-space: nowrap;
+}
+
+.woocommerce-checkout form.checkout_coupon {
+	border: 1px solid var(--co-line);
+	border-radius: var(--co-radius);
+	background: var(--co-surface);
+	padding: 16px;
+	margin: 0 0 32px;
+}
+
+.woocommerce-checkout form.checkout_coupon .form-row {
+	padding: 0;
+	margin: 0 0 10px;
+}
+
+.woocommerce-checkout form.checkout_coupon input[type="text"] {
+	width: 100%;
+	height: 46px;
+	padding: 0 14px;
+	border: 1px solid var(--co-line-strong);
+	border-radius: var(--co-radius);
+	background: var(--co-surface);
+	font-family: 'Inter', sans-serif;
+	font-size: 14px;
+	color: var(--co-ink);
+}
+
+.woocommerce-checkout form.checkout_coupon button {
+	width: 100%;
+	min-height: 46px;
+	border: 1px solid var(--co-ink);
+	border-radius: var(--co-radius);
+	background: transparent;
+	color: var(--co-ink);
+	font-family: 'Inter', sans-serif;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: background .15s ease, color .15s ease;
+}
+
+.woocommerce-checkout form.checkout_coupon button:hover {
+	background: var(--co-ink);
+	color: #fff;
+}
+
+@media (min-width: 560px) {
+	.woocommerce-checkout form.checkout_coupon {
+		display: flex;
+		gap: 10px;
+		align-items: stretch;
+	}
+
+	.woocommerce-checkout form.checkout_coupon .form-row {
+		flex: 1;
+		margin: 0;
+	}
+
+	.woocommerce-checkout form.checkout_coupon button {
+		width: auto;
+		padding: 0 24px;
+	}
+
+	.woocommerce-checkout form.checkout_coupon .form-row-last {
+		flex: 0 0 auto;
+	}
+}
+
+/* ── Billing form ── */
+.woocommerce-checkout .woocommerce-billing-fields h3 {
+	font-size: 26px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	margin: 0 0 28px;
+	color: var(--co-ink);
+	position: relative;
+	padding-top: 20px;
+}
+
+.woocommerce-checkout .woocommerce-billing-fields h3::before {
+	content: "Step 02";
+	display: block;
+	font-family: 'Inter', sans-serif;
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--co-muted);
+	margin-bottom: 8px;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.woocommerce-checkout .form-row {
+	padding: 0;
+	margin: 0 0 22px;
+}
+
+.woocommerce-checkout .form-row label {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	margin-bottom: 8px;
+	color: var(--co-ink);
+}
+
+.woocommerce-checkout .form-row label .required {
+	color: var(--co-danger);
+	text-decoration: none;
+	margin-left: 2px;
+}
+
+.woocommerce-checkout .form-row input.input-text,
+.woocommerce-checkout .form-row textarea,
+.woocommerce-checkout .form-row select {
+	width: 100%;
+	min-height: 48px;
+	padding: 13px 14px;
+	border: 1px solid var(--co-line-strong);
+	border-radius: var(--co-radius);
+	background: var(--co-surface);
+	font-family: 'Inter', sans-serif;
+	font-size: 15px;
+	color: var(--co-ink);
+	transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.woocommerce-checkout .form-row textarea {
+	min-height: 78px;
+	resize: vertical;
+}
+
+.woocommerce-checkout .form-row input::placeholder,
+.woocommerce-checkout .form-row textarea::placeholder {
+	color: var(--co-muted-2);
+}
+
+.woocommerce-checkout .form-row input.input-text:focus,
+.woocommerce-checkout .form-row textarea:focus,
+.woocommerce-checkout .form-row select:focus {
+	outline: none;
+	border-color: var(--co-ink);
+	box-shadow: 0 0 0 3px rgba(20, 19, 17, 0.08);
+}
+
+.woocommerce-checkout .form-row select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding-right: 36px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8676' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 14px center;
+}
+
+/* District + Area/Thana share one row (WooCommerce's own form-row-first/
+   form-row-last pairing convention). WooCommerce's own unscoped
+   ".woocommerce form .form-row-first" float rule outspecifies a plain
+   ".woocommerce-checkout .form-row-first" override (it has an extra `form`
+   type selector), so the stacked mobile state has to match that specificity
+   to actually win below the pairing breakpoint. */
+.woocommerce-checkout form .form-row-first,
+.woocommerce-checkout form .form-row-last {
+	width: 100%;
+	float: none;
+}
+
+@media (min-width: 521px) {
+	.woocommerce-checkout form .form-row-first,
+	.woocommerce-checkout form .form-row-last {
+		width: calc(50% - 8px);
+		float: left;
+	}
+
+	.woocommerce-checkout form .form-row-last {
+		float: right;
+	}
+}
+
+/* ── Payment method ── */
+.woocommerce-checkout .wc_payment_methods {
+	list-style: none;
+	margin: 0 0 16px;
+	padding: 0;
+}
+
+.woocommerce-checkout .wc_payment_method {
+	border: 1px solid var(--co-ink);
+	border-radius: var(--co-radius);
+	padding: 16px 18px;
+	background: var(--co-surface);
+}
+
+.woocommerce-checkout .wc_payment_method label {
+	position: relative;
+	display: block;
+	padding-left: 30px;
+	font-size: 14.5px;
+	font-weight: 600;
+	color: var(--co-ink);
+	margin: 0;
+}
+
+.woocommerce-checkout .wc_payment_method label::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 5px solid var(--co-ink);
+}
+
+/* !important: WooCommerce paints these from woocommerce.css with its own
+   grey/lavender panel colours at a higher specificity. */
+.woocommerce-checkout #payment,
+.woocommerce-checkout #payment ul.payment_methods,
+.woocommerce-checkout #payment div.form-row {
+	background: transparent !important;
+	border: 0;
+	padding: 0;
+}
+
+/* The real gateway list (with the actual radio input) stays inside
+   #order_review next to Place Order — see the PHP docblock on
+   ansclothes_checkout_payment_preview() for why — so it's hidden here and
+   shown instead as .ans-co-payment-preview under billing details. */
+.woocommerce-checkout #payment > ul.wc_payment_methods {
+	display: none;
+}
+
+/* ── Payment method preview (under billing details) ── */
+.ans-co-payment-preview {
+	margin-top: 36px;
+	padding-top: 28px;
+	border-top: 1px solid var(--co-line);
+}
+
+.ans-co-payment-preview__title {
+	position: relative;
+	font-family: 'Bricolage Grotesque', sans-serif;
+	font-size: 26px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--co-ink);
+	margin: 0 0 16px;
+	padding-top: 20px;
+}
+
+.ans-co-payment-preview__title::before {
+	content: "Step 03";
+	display: block;
+	font-family: 'Inter', sans-serif;
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--co-muted);
+	margin-bottom: 8px;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.ans-co-payment-preview__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ans-co-payment-preview__item {
+	display: flex;
+	gap: 14px;
+	align-items: flex-start;
+	border: 1px solid var(--co-ink);
+	border-radius: var(--co-radius);
+	padding: 16px 18px;
+	background: var(--co-surface);
+}
+
+.ans-co-payment-preview__dot {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	border: 5px solid var(--co-ink);
+	margin-top: 2px;
+	flex-shrink: 0;
+}
+
+.ans-co-payment-preview__item strong {
+	font-size: 14.5px;
+	font-weight: 600;
+	color: var(--co-ink);
+	display: block;
+	margin-bottom: 3px;
+}
+
+.ans-co-payment-preview__desc {
+	font-size: 13px;
+	color: var(--co-muted);
+}
+
+.woocommerce-checkout #payment div.payment_box {
+	background: transparent !important;
+	border: 0;
+	padding: 4px 0 0 30px;
+	margin: 0;
+	font-size: 13px;
+	color: var(--co-muted);
+}
+
+.woocommerce-checkout #payment div.payment_box::before {
+	display: none !important;
+}
+
+.woocommerce-checkout .woocommerce-privacy-policy-text {
+	font-size: 12.5px;
+	color: var(--co-muted);
+	line-height: 1.6;
+}
+
+.woocommerce-checkout .woocommerce-privacy-policy-text p {
+	margin: 22px 0 0;
+}
+
+.woocommerce-checkout .woocommerce-privacy-policy-text a {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	color: var(--co-ink);
+}
+
+.woocommerce-checkout #payment div.form-row.place-order {
+	margin: 0;
+}
+
+/* Place order button. */
+.woocommerce-checkout #place_order {
+	width: 100%;
+	margin-top: 20px;
+	min-height: 54px;
+	border: 0;
+	border-radius: var(--co-radius);
+	background: var(--co-ink) !important;
+	color: #fff !important;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: .01em;
+	cursor: pointer;
+	transition: opacity .15s ease;
+}
+
+.woocommerce-checkout #place_order:hover {
+	opacity: .88;
+	background: var(--co-ink) !important;
+	color: #fff !important;
+}
+
+.ans-co-cod-note {
+	display: flex;
+	width: 100%;
+	gap: 10px;
+	align-items: flex-start;
+	font-size: 12px;
+	color: var(--co-muted);
+	line-height: 1.55;
+	margin: 14px 0 0;
+}
+
+.ans-co-cod-note svg {
+	width: 15px;
+	height: 15px;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+/* ── Order summary: hang-tag card ── */
+.woocommerce-checkout #order_review_heading {
+	position: relative;
+	background: var(--co-surface);
+	border: 1px solid var(--co-line-strong);
+	border-bottom: 0;
+	border-radius: 10px 10px 0 0;
+	padding: 34px 26px 0;
+	margin: 0;
+	font-size: 19px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--co-ink);
+	position: sticky;
+	top: 24px;
+	z-index: 1;
+}
+
+.woocommerce-checkout #order_review_heading::before {
+	content: "";
+	position: absolute;
+	top: -11px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 22px;
+	height: 22px;
+	background: var(--co-paper);
+	border: 1px solid var(--co-line-strong);
+	border-radius: 50%;
+}
+
+.woocommerce-checkout #order_review_heading::after {
+	content: "";
+	position: absolute;
+	top: -31px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60px;
+	height: 22px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='22' viewBox='0 0 60 22'%3E%3Cpath d='M30 0 C 10 6, 10 16, 30 22 C 50 16, 50 6, 30 0' fill='none' stroke='%23C9A227' stroke-width='1.6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+}
+
+.woocommerce-checkout #order_review {
+	background: var(--co-surface);
+	border: 1px solid var(--co-line-strong);
+	border-top: 0;
+	border-radius: 0 0 10px 10px;
+	padding: 4px 26px 26px;
+	margin: 0;
+	position: sticky;
+	top: 24px;
+}
+
+.woocommerce-checkout .shop_table {
+	width: 100%;
+	border-collapse: collapse;
+	border: 0;
+	margin: 0;
+}
+
+.woocommerce-checkout .shop_table th,
+.woocommerce-checkout .shop_table td {
+	padding: 9px 0;
+	border: 0;
+	font-size: 13.5px;
+	color: var(--co-muted);
+	text-align: left;
+}
+
+.woocommerce-checkout .shop_table td:last-child,
+.woocommerce-checkout .shop_table th:last-child {
+	text-align: right;
+}
+
+.woocommerce-checkout .shop_table tfoot .order-total th,
+.woocommerce-checkout .shop_table tfoot .order-total td {
+	border-top: 1px solid var(--co-line-strong);
+	margin-top: 6px;
+	padding-top: 16px;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--co-ink);
+}
+
+.woocommerce-checkout .wc_payment_method label {
+	font-family: 'Inter', sans-serif;
+}
+
+/* ── Checkout: order review lines ── */
+.woocommerce-checkout .woocommerce-checkout-review-order-table {
+	width: 100%;
+	border-collapse: collapse;
+	border: 0;
+	background: transparent;
+}
+
+.woocommerce-checkout .woocommerce-checkout-review-order-table td,
+.woocommerce-checkout .woocommerce-checkout-review-order-table th {
+	padding: 16px 0;
+	border: 0;
+	border-top: 1px dashed var(--co-line-strong);
+	vertical-align: middle;
+	font-size: 14px;
+}
+
+.woocommerce-checkout .woocommerce-checkout-review-order-table tbody tr:first-child td {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.woocommerce-checkout .woocommerce-checkout-review-order-table tfoot th {
+	text-align: left;
+	font-weight: 400;
+	color: var(--co-muted);
+	border-top: 0;
+}
+
+.woocommerce-checkout .woocommerce-checkout-review-order-table tfoot td {
+	text-align: right;
+	font-weight: 600;
+	color: var(--co-ink);
+	border-top: 0;
+}
+
+.woocommerce-checkout .woocommerce-checkout-review-order-table .product-total {
+	text-align: right;
+	white-space: nowrap;
+	font-weight: 600;
+	color: var(--co-ink);
+}
+
+.ans-co-line {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.ans-co-line__media {
+	position: relative;
+	width: 56px;
+	flex-shrink: 0;
+}
+
+.ans-co-line__media img {
+	width: 56px;
+	height: 64px;
+	object-fit: cover;
+	border-radius: 4px;
+	display: block;
+	border: 1px solid var(--co-line);
+}
+
+.ans-co-line__qty {
+	position: absolute;
+	top: -7px;
+	right: -7px;
+	min-width: 20px;
+	height: 20px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: var(--co-ink);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.ans-co-line__body {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.ans-co-line__name {
+	font-size: 13.5px;
+	font-weight: 500;
+	line-height: 1.35;
+	color: var(--co-ink);
+}
+
+.ans-co-line__meta,
+.ans-co-line__meta p {
+	margin: 0;
+	font-size: 12px;
+	color: var(--co-muted);
+}
+
+.ans-co-line__remove,
+.ans-co-line__remove:hover {
+	font-family: 'Inter', sans-serif;
+	font-size: 12px;
+}
+
+.ans-co-line__remove {
+	color: var(--co-muted);
+}
+
+.ans-co-line__remove:hover {
+	color: var(--co-danger);
+}
+
+/* ==========================================================================
+   Single product: size chart guide
+   ========================================================================== */
+
+/* assets/js/main.js moves the trigger into this row when a size selector
+   exists, so the label and the trigger share one line. */
+.single-product .variations th.label.ans-has-size-chart {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.ans-size-chart-trigger {
+	background: none;
+	border: 0;
+	padding: 0;
+	margin: 0 0 12px;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--ans-charcoal);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.single-product .variations th.label.ans-has-size-chart .ans-size-chart-trigger {
+	margin: 0;
+}
+
+.ans-size-chart-trigger:hover {
+	color: var(--ans-gold-soft);
+}
+
+.ans-size-chart-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 220;
+	visibility: hidden;
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.ans-size-chart-modal.is-open {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.ans-size-chart-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(20, 15, 12, .5);
+	opacity: 0;
+	transition: opacity .25s ease;
+}
+
+.ans-size-chart-modal.is-open .ans-size-chart-modal__overlay {
+	opacity: 1;
+}
+
+.ans-size-chart-modal__dialog {
+	position: relative;
+	width: min(480px, 100%);
+	max-height: calc(100vh - 48px);
+	overflow: auto;
+	background: #fff;
+	border-radius: 10px;
+	padding: 28px;
+	box-shadow: 0 24px 70px rgba(20, 15, 12, .28);
+	transform: translateY(-12px);
+	opacity: 0;
+	transition: transform .25s ease, opacity .25s ease;
+}
+
+.ans-size-chart-modal.is-open .ans-size-chart-modal__dialog {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+.ans-size-chart-modal__close {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	width: 32px;
+	height: 32px;
+	border: 0;
+	background: none;
+	font-size: 22px;
+	line-height: 1;
+	color: var(--ans-muted);
+	cursor: pointer;
+}
+
+.ans-size-chart-modal__close:hover {
+	color: var(--ans-charcoal);
+}
+
+.ans-size-chart-modal__dialog h3 {
+	margin: 0 0 18px;
+	font-family: var(--ans-serif);
+	font-size: 20px;
+	font-weight: 500;
+	color: var(--ans-charcoal);
+}
+
+.ans-size-chart-modal__table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.ans-size-chart-modal__table th,
+.ans-size-chart-modal__table td {
+	padding: 10px 12px;
+	border: 1px solid var(--ans-warm-line);
+	text-align: left;
+	font-size: 14px;
+}
+
+.ans-size-chart-modal__table th {
+	background: var(--ans-cream);
+	font-weight: 600;
+	color: var(--ans-charcoal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ans-size-chart-modal__dialog,
+	.ans-size-chart-modal__overlay {
+		transition: none;
+	}
+}
