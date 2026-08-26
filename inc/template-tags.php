@@ -20,7 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function ansclothes_defaults() {
 	$assets = get_template_directory_uri() . '/assets';
 
-	return array(
+	$slider_defaults = array();
+	for ( $i = 1; $i <= ANSCLOTHES_SLIDER_SLOTS; $i++ ) {
+		$slider_defaults[ "slider_{$i}_position" ] = 'center';
+	}
+
+	return $slider_defaults + array(
 		'currency'             => '৳',
 
 		'announcement_enable'  => true,
@@ -68,6 +73,8 @@ function ansclothes_defaults() {
 		'category_products_enable' => true,
 		'category_products_slugs'  => '',
 		'category_products_count'  => 8,
+
+		'category_desc_enable'     => true,
 
 		/* Single product buy buttons. A contact button with an empty number is
 		   hidden on the front end — there is nothing to link to. */

@@ -33,7 +33,7 @@ $is_product_archive = is_post_type_archive( 'ans_product' )
             <span class="ans-archive-divider__line"></span>
         </span>
         <?php
-        if ( is_tax( 'ans_product_cat' ) ) {
+        if ( is_tax( 'ans_product_cat' ) && ansclothes_option( 'category_desc_enable' ) ) {
             $term_desc = term_description();
             if ( $term_desc ) {
                 echo '<div class="ans-archive-desc">' . wp_kses_post( $term_desc ) . '</div>';

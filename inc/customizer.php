@@ -62,11 +62,52 @@ function ansclothes_sanitize_html( $value ) {
 }
 
 /**
+ * Whitelist a hero slide's focal point, falling back to "center".
+ *
+ * @param string $value Raw value.
+ * @return string
+ */
+function ansclothes_sanitize_focal_point( $value ) {
+	$allowed = array( 'center', 'top', 'bottom', 'left', 'right' );
+
+	return in_array( $value, $allowed, true ) ? $value : 'center';
+}
+
+/**
  * The full Customizer field map.
  *
  * @return array
  */
 function ansclothes_customizer_fields() {
+	$focal_point_choices = array(
+		'center' => __( 'Center (default)', 'ansclothes' ),
+		'top'    => __( 'Top', 'ansclothes' ),
+		'bottom' => __( 'Bottom', 'ansclothes' ),
+		'left'   => __( 'Left', 'ansclothes' ),
+		'right'  => __( 'Right', 'ansclothes' ),
+	);
+
+	$slider_fields = array();
+	for ( $i = 1; $i <= ANSCLOTHES_SLIDER_SLOTS; $i++ ) {
+		$slider_fields[ "slider_{$i}_image" ]    = array(
+			/* translators: %d: slide number. */
+			'label' => sprintf( __( 'Slide %d Image', 'ansclothes' ), $i ),
+			'type'  => 'image',
+		);
+		$slider_fields[ "slider_{$i}_url" ]      = array(
+			/* translators: %d: slide number. */
+			'label' => sprintf( __( 'Slide %d Link', 'ansclothes' ), $i ),
+			'type'  => 'url',
+		);
+		$slider_fields[ "slider_{$i}_position" ] = array(
+			/* translators: %d: slide number. */
+			'label'       => sprintf( __( 'Slide %d Focal Point', 'ansclothes' ), $i ),
+			'type'        => 'select',
+			'choices'     => $focal_point_choices,
+			'description' => __( 'The banner crops the image to fit — pick the side that must stay visible if the important part (a face, text, a product) isn\'t centered.', 'ansclothes' ),
+		);
+	}
+
 	return array(
 		'ansclothes_announcement' => array(
 			'title'  => __( 'Announcement Bar', 'ansclothes' ),
@@ -119,12 +160,7 @@ function ansclothes_customizer_fields() {
 		),
 		'ansclothes_slider'      => array(
 			'title'  => __( 'Homepage — Slider', 'ansclothes' ),
-			'fields' => array(
-				'slider_1_image' => array( 'label' => __( 'Slide 1 Image', 'ansclothes' ), 'type' => 'image' ),
-				'slider_1_url'   => array( 'label' => __( 'Slide 1 Link', 'ansclothes' ), 'type' => 'url' ),
-				'slider_2_image' => array( 'label' => __( 'Slide 2 Image', 'ansclothes' ), 'type' => 'image' ),
-				'slider_2_url'   => array( 'label' => __( 'Slide 2 Link', 'ansclothes' ), 'type' => 'url' ),
-			),
+			'fields' => $slider_fields,
 		),
 		'ansclothes_shop'      => array(
 			'title'  => __( 'Homepage — Circle Categories', 'ansclothes' ),
@@ -159,6 +195,16 @@ function ansclothes_customizer_fields() {
 				'category_products_enable' => array( 'label' => __( 'Show category products section', 'ansclothes' ), 'type' => 'checkbox' ),
 				'category_products_slugs'  => array( 'label' => __( 'Specific category slugs to show (comma-separated)', 'ansclothes' ), 'type' => 'text' ),
 				'category_products_count'  => array( 'label' => __( 'Number of products per category', 'ansclothes' ), 'type' => 'number' ),
+			),
+		),
+		'ansclothes_category_archive'  => array(
+			'title'  => __( 'Shop — Category Archive Page', 'ansclothes' ),
+			'fields' => array(
+				'category_desc_enable' => array(
+					'label'       => __( 'Show category description', 'ansclothes' ),
+					'type'        => 'checkbox',
+					'description' => __( 'Shows the category\'s description text (set under Products → Categories) at the top of its archive page.', 'ansclothes' ),
+				),
 			),
 		),
 
@@ -223,6 +269,9 @@ function ansclothes_customize_register( $wp_customize ) {
 				case 'textarea':
 					$sanitize = 'sanitize_textarea_field';
 					break;
+				case 'select':
+					$sanitize = 'ansclothes_sanitize_focal_point';
+					break;
 				default:
 					$sanitize = 'sanitize_text_field';
 			}
@@ -265,6 +314,10 @@ function ansclothes_customize_register( $wp_customize ) {
 			if ( 'price' === $type ) {
 				$control_args['type']        = 'number';
 				$control_args['input_attrs'] = array( 'min' => 0, 'step' => '0.01' );
+			}
+
+			if ( 'select' === $type ) {
+				$control_args['choices'] = isset( $field['choices'] ) ? $field['choices'] : array();
 			}
 
 			$wp_customize->add_control( $key, $control_args );

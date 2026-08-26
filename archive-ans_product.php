@@ -23,7 +23,7 @@ $ansclothes_is_tax = is_tax( 'ans_product_cat' );
 	</h1>
 
 	<?php
-	if ( $ansclothes_is_tax && term_description() ) {
+	if ( $ansclothes_is_tax && ansclothes_option( 'category_desc_enable' ) && term_description() ) {
 		echo '<div class="ans-term-desc">' . wp_kses_post( term_description() ) . '</div>';
 	}
 	?>

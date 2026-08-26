@@ -7,35 +7,29 @@
 
 $ansclothes_slides = array();
 
-$slide1_img = ansclothes_option( 'slider_1_image' );
-$slide1_url = ansclothes_option( 'slider_1_url' );
-if ( $slide1_img ) {
-    $ansclothes_slides[] = array(
-        'image' => $slide1_img,
-        'url'   => $slide1_url ? $slide1_url : ansclothes_shop_url(),
-        'alt'   => __( 'Slide 1', 'ansclothes' ),
-    );
-} else {
-    $ansclothes_slides[] = array(
-        'image' => 'https://arjobd.com/uploads/Banner/web-coverpng.webp',
-        'url'   => ansclothes_shop_url(),
-        'alt'   => __( 'ANSClothes cover banner', 'ansclothes' ),
-    );
-}
+/* Slots 1 & 2 fall back to the original design's placeholder banners so the
+   hero never looks empty before the shop uploads its own images; slots 3+
+   are purely optional extra slides and are simply skipped when unset. */
+$ansclothes_fallback_slides = array(
+    1 => 'https://arjobd.com/uploads/Banner/web-coverpng.webp',
+    2 => 'https://arjobd.com/uploads/Banner/cover333.webp',
+);
 
-$slide2_img = ansclothes_option( 'slider_2_image' );
-$slide2_url = ansclothes_option( 'slider_2_url' );
-if ( $slide2_img ) {
+for ( $ansclothes_i = 1; $ansclothes_i <= ANSCLOTHES_SLIDER_SLOTS; $ansclothes_i++ ) {
+    $slide_img = ansclothes_option( "slider_{$ansclothes_i}_image" );
+
+    if ( ! $slide_img && ! isset( $ansclothes_fallback_slides[ $ansclothes_i ] ) ) {
+        continue;
+    }
+
+    $slide_url = ansclothes_option( "slider_{$ansclothes_i}_url" );
+
     $ansclothes_slides[] = array(
-        'image' => $slide2_img,
-        'url'   => $slide2_url ? $slide2_url : ansclothes_shop_url(),
-        'alt'   => __( 'Slide 2', 'ansclothes' ),
-    );
-} else {
-    $ansclothes_slides[] = array(
-        'image' => 'https://arjobd.com/uploads/Banner/cover333.webp',
-        'url'   => ansclothes_shop_url(),
-        'alt'   => __( 'ANSClothes collection banner', 'ansclothes' ),
+        'image'    => $slide_img ? $slide_img : $ansclothes_fallback_slides[ $ansclothes_i ],
+        'url'      => $slide_url ? $slide_url : ansclothes_shop_url(),
+        /* translators: %d: slide number. */
+        'alt'      => sprintf( __( 'Slide %d', 'ansclothes' ), $ansclothes_i ),
+        'position' => ansclothes_option( "slider_{$ansclothes_i}_position" ),
     );
 }
 ?>
@@ -44,7 +38,7 @@ if ( $slide2_img ) {
 	<div class="ans-hero__slides">
 		<?php foreach ( $ansclothes_slides as $ansclothes_index => $ansclothes_slide ) : ?>
 			<a class="ans-hero__slide<?php echo 0 === $ansclothes_index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $ansclothes_slide['url'] ); ?>">
-				<img src="<?php echo esc_url( $ansclothes_slide['image'] ); ?>" alt="<?php echo esc_attr( $ansclothes_slide['alt'] ); ?>">
+				<img src="<?php echo esc_url( $ansclothes_slide['image'] ); ?>" alt="<?php echo esc_attr( $ansclothes_slide['alt'] ); ?>" style="object-position: <?php echo esc_attr( $ansclothes_slide['position'] ); ?>;">
 			</a>
 		<?php endforeach; ?>
 	</div>

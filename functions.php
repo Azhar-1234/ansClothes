@@ -11,6 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'ANSCLOTHES_VERSION', '1.4.0' );
 
+/* Number of hero banner slides editable from the Customizer. */
+define( 'ANSCLOTHES_SLIDER_SLOTS', 5 );
+
 /**
  * Theme setup.
  */
