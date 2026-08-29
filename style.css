@@ -3439,19 +3439,28 @@ body .woocommerce-message a.button:hover {
 		min-height: 74px;
 	}
 
+	/*
+	 * Placement is explicit rather than relying on `order` + source-order
+	 * auto-placement: `.ans-nav` is only a grid item at all while open
+	 * (`display: none` otherwise), so the row can have either two or three
+	 * items depending on menu state. Auto-placement would then slot
+	 * `.ans-header__actions` into the middle track when the nav is closed
+	 * instead of the last one, pushing it against the logo. Pinning each
+	 * item to its column keeps the layout the same either way.
+	 */
 	.ans-branding {
-		order: 1;
+		grid-column: 1;
 	}
 
 	.ans-header__actions {
-		order: 3;
+		grid-column: 3;
 		gap: 8px;
 	}
 
 	.ans-branding img,
 	.ans-branding .custom-logo {
 		height: 36px;
-		max-width: 160px;
+		max-width: 140px;
 	}
 
 	.ans-icon-btn {
@@ -3462,8 +3471,8 @@ body .woocommerce-message a.button:hover {
 
 	.ans-nav {
 		display: none;
-		order: 4;
 		grid-column: 1 / -1;
+		grid-row: 2;
 		min-height: auto;
 		overflow: visible;
 		padding: 18px var(--ans-gutter);
@@ -3607,19 +3616,14 @@ body .woocommerce-message a.button:hover {
 		min-height: 48px;
 	}
 
-	.ans-footer,
-	.ans-footer__bottom {
-		justify-content: center;
-		text-align: center;
-	}
-
-	.ans-footer__brand {
-		margin: 0 auto;
+	.ans-footer {
+		text-align: left;
 	}
 
 	.ans-footer__bottom {
 		flex-direction: column;
-		align-items: center;
+		align-items: flex-start;
+		text-align: left;
 	}
 
 	.ans-404 h1 {
@@ -3651,8 +3655,15 @@ body .woocommerce-message a.button:hover {
 	}
 }
 
-/* Tablet: 2-col sidebar + keep 4% padding */
-@media (max-width: 1024px) {
+/*
+ * Tablet: 2-col sidebar + keep 4% padding.
+ * Scoped to a min-width so it doesn't also match phone widths — a plain
+ * max-width query here would come after, and so override, the mobile
+ * single-column rules below at every width they share (anything ≤640px),
+ * reserving a 220px sidebar column even though the sidebar itself is
+ * display:none there, squeezing the product grid into whatever's left.
+ */
+@media (min-width: 641px) and (max-width: 1024px) {
 	.ans-archive-shell {
 		grid-template-columns: 220px 1fr;
 		gap: 32px;
@@ -3688,119 +3699,6 @@ body .woocommerce-message a.button:hover {
 	.ans-pcard__atc {
 		font-size: 10px;
 		padding: 10px 14px;
-	}
-}
-
-@media (max-width: 900px) {
-	.ans-nav-toggle {
-		display: block;
-	}
-
-	.ans-header__bar {
-		grid-template-columns: auto 1fr auto;
-		gap: 14px;
-		min-height: 74px;
-	}
-
-	.ans-branding {
-		order: 1;
-	}
-
-	.ans-header__actions {
-		order: 3;
-		gap: 8px;
-	}
-
-	.ans-branding img,
-	.ans-branding .custom-logo {
-		height: 36px;
-		max-width: 160px;
-	}
-
-	.ans-icon-btn {
-		width: 42px;
-		height: 42px;
-		font-size: 18px;
-	}
-
-	.ans-nav {
-		display: none;
-		order: 4;
-		grid-column: 1 / -1;
-		min-height: auto;
-		overflow: visible;
-		padding: 18px var(--ans-gutter);
-	}
-
-	.ans-nav.is-open {
-		display: block;
-	}
-
-	.ans-nav ul {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 18px;
-	}
-
-	.ans-nav ul ul {
-		position: static;
-		display: flex;
-		border: 0;
-		padding: 8px 0 0 14px;
-	}
-
-	.ans-editorial,
-	.ans-single-product {
-		grid-template-columns: 1fr;
-	}
-
-	.ans-hero {
-		min-height: clamp(300px, 62vw, 520px);
-	}
-
-	.ans-editorial__media {
-		order: -1;
-		min-height: 420px;
-	}
-
-	.ans-hero__title {
-		font-size: 46px;
-	}
-
-	.ans-section-head h2 {
-		font-size: 30px;
-	}
-
-	.ans-promises {
-		grid-template-columns: 1fr;
-	}
-
-	.ans-promise {
-		border-right: 0;
-		border-bottom: 1px solid var(--ans-warm-line);
-		padding: 40px 0;
-		margin: 0 var(--ans-gutter);
-	}
-
-	.ans-about blockquote {
-		font-size: 26px;
-	}
-
-	.ans-prefooter__features,
-	.ans-footer__main {
-		grid-template-columns: 1fr;
-	}
-
-	.ans-prefooter-card--large {
-		min-height: 240px;
-	}
-
-	.ans-footer-widgets {
-		grid-template-columns: 1fr;
-	}
-
-	.ans-gallery {
-		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
@@ -4574,6 +4472,11 @@ body.ans-cart-open {
 	font-size: 17px;
 	font-weight: 700;
 	color: var(--ans-charcoal);
+}
+
+.ans-cod__row--discount {
+	color: var(--ans-gold);
+	font-weight: 600;
 }
 
 .ans-cod__submit {

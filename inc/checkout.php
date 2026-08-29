@@ -1,7 +1,7 @@
 <?php
 /**
  * Checkout page — reduced to the fields a cash-on-delivery shop actually
- * needs: name, mobile, district, area/thana and address, plus the optional
+ * needs: name, email, mobile, district and address, plus the optional
  * coupon form.
  *
  * The page uses the classic [woocommerce_checkout] shortcode rather than the
@@ -36,6 +36,16 @@ function ansclothes_checkout_fields( $fields ) {
 			'autocomplete' => 'name',
 			'priority'    => 10,
 		),
+		'billing_email'      => array(
+			'label'       => __( 'Email', 'ansclothes' ),
+			'placeholder' => __( 'Email address', 'ansclothes' ),
+			'required'    => true,
+			'type'        => 'email',
+			'class'       => array( 'form-row-wide' ),
+			'validate'    => array( 'email' ),
+			'autocomplete' => 'email',
+			'priority'    => 20,
+		),
 		'billing_phone'      => array(
 			'label'       => __( 'Mobile number', 'ansclothes' ),
 			'placeholder' => __( 'Mobile number', 'ansclothes' ),
@@ -43,7 +53,7 @@ function ansclothes_checkout_fields( $fields ) {
 			'type'        => 'tel',
 			'class'       => array( 'form-row-wide' ),
 			'autocomplete' => 'tel',
-			'priority'    => 20,
+			'priority'    => 30,
 		),
 		/* Drives shipping-zone matching (see the file docblock) — kept as
 		   WooCommerce's own 'state' field type so it renders the district
@@ -52,25 +62,18 @@ function ansclothes_checkout_fields( $fields ) {
 			'type'        => 'state',
 			'label'       => __( 'District', 'ansclothes' ),
 			'required'    => true,
-			'class'       => array( 'form-row-first' ),
+			'class'       => array( 'form-row-wide' ),
 			'validate'    => array( 'state' ),
-			'priority'    => 30,
-		),
-		'billing_address_2'  => array(
-			'label'       => __( 'Area / Thana', 'ansclothes' ),
-			'placeholder' => __( 'e.g. Banani', 'ansclothes' ),
-			'required'    => false,
-			'class'       => array( 'form-row-last' ),
-			'priority'    => 35,
+			'priority'    => 40,
 		),
 		'billing_address_1'  => array(
 			'type'        => 'textarea',
-			'label'       => __( 'Details address', 'ansclothes' ),
+			'label'       => __( 'Address', 'ansclothes' ),
 			'placeholder' => __( 'Full address with house, road and area', 'ansclothes' ),
 			'required'    => true,
 			'class'       => array( 'form-row-wide' ),
 			'autocomplete' => 'street-address',
-			'priority'    => 40,
+			'priority'    => 50,
 		),
 		/* Kept as a hidden field: WooCommerce still needs a country for
 		   shipping and tax lookups even though it is not asked for. */
@@ -116,19 +119,6 @@ add_filter( 'woocommerce_cart_needs_shipping_address', 'ansclothes_checkout_no_s
  */
 add_filter( 'woocommerce_enable_signup_and_login_from_checkout', '__return_false' );
 add_filter( 'woocommerce_ship_to_different_address_checked', '__return_false' );
-
-/**
- * Email is not collected, so make sure WooCommerce does not insist on it.
- *
- * @param array $fields Billing fields.
- * @return array
- */
-function ansclothes_checkout_no_email_required( $fields ) {
-	unset( $fields['billing_email'] );
-
-	return $fields;
-}
-add_filter( 'woocommerce_billing_fields', 'ansclothes_checkout_no_email_required', 20 );
 
 /**
  * No order-notes field is collected, so drop the whole "Additional

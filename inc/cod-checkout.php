@@ -81,10 +81,16 @@ function ansclothes_cod_summary( $shipping_key = '' ) {
 		return '';
 	}
 
-	$shipping = ansclothes_cod_get_shipping_option( $shipping_key );
+	// Recalculate so any quantity-based discount (e.g. WC Smart Discount)
+	// has run and its cart fee is up to date before the summary is built.
+	WC()->cart->calculate_totals();
+
+	$shipping  = ansclothes_cod_get_shipping_option( $shipping_key );
 	$ship_cost = $shipping ? $shipping['cost'] : 0;
 	$subtotal  = (float) WC()->cart->get_subtotal();
-	$total     = $subtotal + $ship_cost;
+	$fees      = WC()->cart->get_fees();
+	$fees_total = array_sum( wp_list_pluck( $fees, 'total' ) );
+	$total     = $subtotal + $ship_cost + $fees_total;
 
 	ob_start();
 	?>
@@ -138,6 +144,12 @@ function ansclothes_cod_summary( $shipping_key = '' ) {
 				<span><?php esc_html_e( 'Shipping', 'ansclothes' ); ?></span>
 				<span><?php echo wp_kses_post( wc_price( $ship_cost ) ); ?></span>
 			</div>
+			<?php foreach ( $fees as $fee ) : ?>
+				<div class="ans-cod__row ans-cod__row--discount">
+					<span><?php echo esc_html( $fee->name ); ?></span>
+					<span><?php echo wp_kses_post( wc_price( $fee->total ) ); ?></span>
+				</div>
+			<?php endforeach; ?>
 			<div class="ans-cod__row ans-cod__row--total">
 				<span><?php esc_html_e( 'Total', 'ansclothes' ); ?></span>
 				<span><?php echo wp_kses_post( wc_price( $total ) ); ?></span>
@@ -351,11 +363,29 @@ function ansclothes_cod_place_order() {
 
 	$shipping = ansclothes_cod_get_shipping_option( $ship_id );
 
+	// Recalculate so any quantity-based discount (e.g. WC Smart Discount) has
+	// run and its cart fee reflects the final quantities before the order is
+	// built from the cart.
+	WC()->cart->calculate_totals();
+
 	try {
 		$order = wc_create_order( array( 'customer_id' => get_current_user_id() ) );
 
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			$order->add_product( $cart_item['data'], $cart_item['quantity'] );
+		}
+
+		// Carry over cart-level fees (discounts, surcharges) — this order is
+		// built by hand rather than through WC_Checkout, so nothing else
+		// transfers them onto the order.
+		foreach ( WC()->cart->get_fees() as $cart_fee ) {
+			$fee_item = new WC_Order_Item_Fee();
+			$fee_item->set_name( $cart_fee->name );
+			$fee_item->set_amount( $cart_fee->amount );
+			$fee_item->set_total( $cart_fee->total );
+			$fee_item->set_tax_class( $cart_fee->tax_class );
+			$fee_item->set_tax_status( $cart_fee->taxable ? 'taxable' : 'none' );
+			$order->add_item( $fee_item );
 		}
 
 		$fields = array(

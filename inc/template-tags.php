@@ -93,6 +93,10 @@ function ansclothes_defaults() {
 		'product_call_number'      => '',
 
 		'footer_copy'          => __( '© 2026 ANSClothes — www.ansclothes.com', 'ansclothes' ),
+		'footer_address_1'     => __( 'Banani: Level 3, House 45, Road 11, Block C', 'ansclothes' ),
+		'footer_address_2'     => __( 'Mirpur 1: Level 4, Rupayan Latifa Shamsuddin Square', 'ansclothes' ),
+		'footer_facebook_url'  => '',
+		'footer_instagram_url' => '',
 	);
 }
 

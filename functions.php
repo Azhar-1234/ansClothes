@@ -49,8 +49,9 @@ function ansclothes_setup() {
 
 	register_nav_menus(
 		array(
-			'primary' => __( 'Primary Menu', 'ansclothes' ),
-			'footer'  => __( 'Footer Menu', 'ansclothes' ),
+			'primary'         => __( 'Primary Menu', 'ansclothes' ),
+			'footer'          => __( 'Footer Menu - Information', 'ansclothes' ),
+			'footer_policies' => __( 'Footer Menu - Policies', 'ansclothes' ),
 		)
 	);
 

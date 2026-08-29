@@ -207,6 +207,16 @@ function ansclothes_customizer_fields() {
 				),
 			),
 		),
+		'ansclothes_footer'            => array(
+			'title'  => __( 'Footer', 'ansclothes' ),
+			'fields' => array(
+				'footer_address_1'     => array( 'label' => __( '"Visit Us" — address line 1', 'ansclothes' ), 'type' => 'text' ),
+				'footer_address_2'     => array( 'label' => __( '"Visit Us" — address line 2', 'ansclothes' ), 'type' => 'text' ),
+				'footer_copy'          => array( 'label' => __( 'Copyright text', 'ansclothes' ), 'type' => 'text' ),
+				'footer_facebook_url'  => array( 'label' => __( 'Facebook URL', 'ansclothes' ), 'type' => 'url', 'description' => __( 'Leave empty to hide the Facebook link.', 'ansclothes' ) ),
+				'footer_instagram_url' => array( 'label' => __( 'Instagram URL', 'ansclothes' ), 'type' => 'url', 'description' => __( 'Leave empty to hide the Instagram link.', 'ansclothes' ) ),
+			),
+		),
 
 	);
 }
