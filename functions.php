@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ANSCLOTHES_VERSION', '1.4.0' );
+define( 'ANSCLOTHES_VERSION', '1.4.6' );
 
 /* Number of hero banner slides editable from the Customizer. */
 define( 'ANSCLOTHES_SLIDER_SLOTS', 5 );

@@ -53,6 +53,7 @@ $is_archive = is_shop() || is_product_category() || is_product_tag();
 			<h2 class="ans-filter-sidebar__title"><?php esc_html_e( 'Filters', 'ansclothes' ); ?></h2>
 
 			<?php if ( class_exists( 'WooCommerce' ) ) : ?>
+				<div class="ans-filter-panel">
 
 				<?php
 				/* Price filter widget area — rendered via a hook-based shortcode wrapper */
@@ -127,18 +128,37 @@ $is_archive = is_shop() || is_product_category() || is_product_tag();
 					</button>
 					<div class="ans-filter-group__body" id="filter-cats">
 						<?php
-						the_widget(
-							'WC_Widget_Product_Categories',
+						$ans_current_category  = is_product_category() ? get_queried_object_id() : 0;
+						$ans_category_ancestors = $ans_current_category ? get_ancestors( $ans_current_category, 'product_cat' ) : array();
+						$ans_parent_categories = get_terms(
 							array(
-								'title'              => '',
-								'show_children_only' => 0,
-								'hide_empty'         => 0,
-								'show_count'         => 0,
-								'orderby'            => 'name',
-								'dropdown'           => 0,
+								'taxonomy'   => 'product_cat',
+								'parent'     => 0,
+								'hide_empty' => true,
+								'orderby'    => 'name',
 							)
 						);
 						?>
+						<?php if ( ! is_wp_error( $ans_parent_categories ) && $ans_parent_categories ) : ?>
+							<ul class="product-categories ans-top-categories">
+								<li class="<?php echo is_shop() ? 'current-cat' : ''; ?>">
+									<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>">
+										<span><?php esc_html_e( 'All Collections', 'ansclothes' ); ?></span>
+									</a>
+								</li>
+								<?php foreach ( $ans_parent_categories as $ans_category ) : ?>
+									<?php $ans_category_link = get_term_link( $ans_category ); ?>
+									<?php if ( ! is_wp_error( $ans_category_link ) ) : ?>
+										<li class="<?php echo ( $ans_current_category === $ans_category->term_id || in_array( $ans_category->term_id, $ans_category_ancestors, true ) ) ? 'current-cat' : ''; ?>">
+											<a href="<?php echo esc_url( $ans_category_link ); ?>">
+												<span><?php echo esc_html( $ans_category->name ); ?></span>
+												<span class="ans-category-count"><?php echo esc_html( $ans_category->count ); ?></span>
+											</a>
+										</li>
+									<?php endif; ?>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
 					</div>
 				</div>
 
@@ -191,6 +211,7 @@ $is_archive = is_shop() || is_product_category() || is_product_tag();
 					</div>
 				</div>
 
+				</div><!-- .ans-filter-panel -->
 			<?php endif; // WooCommerce ?>
 
 		</aside>

@@ -95,6 +95,9 @@ function ansclothes_defaults() {
 		'footer_copy'          => __( '© 2026 ANSClothes — www.ansclothes.com', 'ansclothes' ),
 		'footer_address_1'     => __( 'Banani: Level 3, House 45, Road 11, Block C', 'ansclothes' ),
 		'footer_address_2'     => __( 'Mirpur 1: Level 4, Rupayan Latifa Shamsuddin Square', 'ansclothes' ),
+		'footer_credit_label'  => __( 'Developed by', 'ansclothes' ),
+		'footer_credit_name'   => __( 'Azhar Uddin', 'ansclothes' ),
+		'footer_credit_url'    => 'https://azhar-dev-omega.vercel.app/',
 		'footer_facebook_url'  => '',
 		'footer_instagram_url' => '',
 	);
@@ -198,6 +201,7 @@ function ansclothes_product_category_links() {
 		array(
 			'taxonomy'   => $taxonomy,
 			'hide_empty' => false,
+			'parent'     => 0,
 			'number'     => 8,
 			'orderby'    => 'menu_order',
 			'order'      => 'ASC',

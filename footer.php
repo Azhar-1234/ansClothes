@@ -72,14 +72,14 @@
 		</div>
 	</div>
 
-	<?php if ( is_active_sidebar( 'footer-1' ) ) : ?>
-		<div class="ans-footer-widgets">
-			<?php dynamic_sidebar( 'footer-1' ); ?>
-		</div>
-	<?php endif; ?>
-
 	<div class="ans-footer__bottom">
 		<span class="ans-footer__copy"><?php echo esc_html( ansclothes_option( 'footer_copy' ) ); ?></span>
+		<?php if ( ansclothes_option( 'footer_credit_name' ) && ansclothes_option( 'footer_credit_url' ) ) : ?>
+			<span class="ans-footer__credit">
+				<?php echo esc_html( ansclothes_option( 'footer_credit_label' ) ); ?>
+				<a href="<?php echo esc_url( ansclothes_option( 'footer_credit_url' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( ansclothes_option( 'footer_credit_name' ) ); ?></a>
+			</span>
+		<?php endif; ?>
 		<?php if ( ansclothes_option( 'footer_facebook_url' ) || ansclothes_option( 'footer_instagram_url' ) ) : ?>
 			<div class="ans-footer__social">
 				<?php if ( ansclothes_option( 'footer_facebook_url' ) ) : ?>
